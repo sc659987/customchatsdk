@@ -1,0 +1,1 @@
+include ':app', ':generator', ':firebase_plugin', ':sdk', ':country_picker'
