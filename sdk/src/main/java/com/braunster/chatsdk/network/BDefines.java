@@ -16,9 +16,14 @@ import java.util.Random;
  */
 public class BDefines {
 
-    /** This is the root path of all the app data,
-     *  This is helpful if you want to test new behavior and don't want to infect all the old thread. */
-    public static final String BRootPath = "firebase_v4_diagnostic/";
+
+    public final static boolean PRODUCTION_ENVIRONMENT = true;
+
+    /**
+     * This is the root path of all the app data,
+     * This is helpful if you want to test new behavior and don't want to infect all the old thread.
+     */
+    public static final String BRootPath = "chats/";
 
     /**
      * The version name of the app, Here we are using the name from the BuildConfig.
@@ -27,30 +32,43 @@ public class BDefines {
      **/
     public static String BAppVersion = BuildConfig.VERSION_NAME;
 
-    /** The server url that is used to do all the API calls.*/
-    public static String ServerUrl = "https://chat-sdk-v4.firebaseio.com/" + BRootPath;
+    /**
+     * The server url that is used to do all the API calls.
+     */
+    public static String ServerUrl = "https://incandescent-torch-5688.firebaseio.com/" + BRootPath;
 
-    /** The url that is used for the file uploads.*/
-    public static String FirebaseStoragePath = "gs://chat-sdk-v4.appspot.com";
+    /**
+     * The url that is used for the file uploads.
+     */
+    public static String FirebaseStoragePath = "gs://incandescent-torch-5688.appspot.com";
+
+    static {
+        ServerUrl = PRODUCTION_ENVIRONMENT ? "https://incandescent-torch-5688.firebaseio.com/" + BRootPath : "https://shining-inferno-4116.firebaseio.com/" + BRootPath;
+        FirebaseStoragePath = PRODUCTION_ENVIRONMENT ? "gs://incandescent-torch-5688.appspot.com" : "gs://shining-inferno-4116.appspot.com";
+
+    }
+
 
     /**
      * The name of the app image directory that will be seen in the phone image galley
-     * */
+     */
     public static final String ImageDirName = "AndroidChatSDK";
 
     public static final String BCloudImageToken = "skbb48";
 
-    public static String getDefaultImageUrl(String url, int width, int height){
+    public static String getDefaultImageUrl(String url, int width, int height) {
         return String.format("http://%s.cloudimage.io/s/crop/%sx%s/%s", BCloudImageToken, width, height, url);
     }
 
-    public static String getDefaultUserName(){
+    public static String getDefaultUserName() {
         return "Chatcat" + String.valueOf(new Random().nextInt(1000) + 1);
     }
 
-    /** Each type get his own prefix by using the private constructor.
-     * This is the place to change the prefix if wanted.*/
-    public static final class BAccountType{
+    /**
+     * Each type get his own prefix by using the private constructor.
+     * This is the place to change the prefix if wanted.
+     */
+    public static final class BAccountType {
         public static final int Password = 1;
         public static final int Facebook = 2;
         public static final int Twitter = 4;
@@ -62,36 +80,37 @@ public class BDefines {
 
     /**
      * If true anonymous login is possible.
-     * */
+     */
     public static final boolean AnonymousLoginEnabled = true;
 
     /**
      * The initials that will be used to create initials image for anonymous user and user without names.
+     *
      * @see com.braunster.chatsdk.Utils.ImageUtils#getInitialsBitmap(int, int, String)
-     * */
+     */
     public static final String InitialsForAnonymous = "AN";
 
     /**
-     * divide tat is used to divide b */
+     * divide tat is used to divide b
+     */
     public static final String DIVIDER = ",";
 
     /**
      * Vibration Duration in Millis of the notifications.
-     * */
+     */
     public static final int VIBRATION_DURATION = 300;
 
     /**
      * Amount of messages that will be pulled for a thread from local db or from server.
-     * */
+     */
     public static final int MAX_MESSAGES_TO_PULL = 30;
 
     /**
      * If true user phone number will be index if not empty.
-     *
+     * <p>
      * This is not final so you could set this up each time the user enters the app,
      * This way you could make an option to enable this option in your settings screen if the user does not want to index his phone number.
-     *
-     * */
+     */
     public static boolean IndexUserPhoneNumber = true;
 
     public static final String ContactDeveloper_Email = "";
@@ -100,10 +119,10 @@ public class BDefines {
 
     /**
      * Currently there is no reason to disable following but maybe in the future it would be needed to keep track of it.
-     * */
+     */
     public static boolean EnableFollowers = true;
 
-    public static final class Defaults{
+    public static final class Defaults {
         public static final String MessageColor = "0.635294 0.552941 0.686275 1";
         public static final String BubbleDefaultColor = "#27ae60";
         public static final String BubbleDefaultPressedColor = "#3498db";
@@ -118,7 +137,7 @@ public class BDefines {
         public static final int DOUBLE_CLICK_INTERVAL = 2000;
     }
 
-    public static final class Prefs{
+    public static final class Prefs {
         public static final String CurrentUserLoginInfo = "Current-User-Login-Info";
         public static final String AuthenticationID = "authentication-id";
         public static final String TokenKey = "token";
@@ -130,7 +149,7 @@ public class BDefines {
         public static final String PushEnabled = "push-enabled";
     }
 
-    public static final class Keys{
+    public static final class Keys {
         /*Metadata*/
         public static final String BEmail = "email";
         public static final String BKey = "key";
@@ -168,11 +187,11 @@ public class BDefines {
         public static final String CONTENT = "text";
         public static final String MESSAGE_ENTITY_ID = "message_entity_id";
         public static final String THREAD_ENTITY_ID = "thread_entity_id";
-        public static final String MESSAGE_DATE ="message_date";
-        public static final String MESSAGE_SENDER_ENTITY_ID ="message_sender_entity_id";
-        public static final String MESSAGE_SENDER_NAME ="message_sender_name";
+        public static final String MESSAGE_DATE = "message_date";
+        public static final String MESSAGE_SENDER_ENTITY_ID = "message_sender_entity_id";
+        public static final String MESSAGE_SENDER_NAME = "message_sender_name";
         public static final String MESSAGE_TYPE = "message_type";
-        public static final String MESSAGE_PAYLOAD= "message_payload";
+        public static final String MESSAGE_PAYLOAD = "message_payload";
 
         public static final String SOUND = "sound";
         public static final String Default = "default";
@@ -188,10 +207,10 @@ public class BDefines {
         public static final String BGender = "gender";
         public static final String BCountry = "country";
         public static final String BLocation = "location";
-        public static final String BDateOfBirth= "date-of-birth";
+        public static final String BDateOfBirth = "date-of-birth";
         public static final String BStatus = "status";
 
-        public static final class ThirdPartyData{
+        public static final class ThirdPartyData {
             public static final String ID = "id";
             public static final String Name = "name";
             public static final String ImageURL = "profile_image_url";
@@ -201,7 +220,7 @@ public class BDefines {
         }
     }
 
-    public static final class Time{
+    public static final class Time {
         public static final float BMinutes = 60.0f;
         public static final float BHours = 60.0f * BMinutes;
         public static final float BDays = 24.0f * BHours;
@@ -209,7 +228,7 @@ public class BDefines {
         public static final float BYears = 12.0f * BMonths;
     }
 
-    public static final class ImageProperties{
+    public static final class ImageProperties {
 
         public static final int MAX_WIDTH_IN_PX = 1920;
         public static final int MAX_HEIGHT_IN_PX = 2560;
@@ -221,7 +240,7 @@ public class BDefines {
         public static final float INITIALS_TEXT_SIZE = 150f;
     }
 
-    public static final class ProviderString{
+    public static final class ProviderString {
         public static final String Anonymous = "anonymous";
         public static final String Password = "password";
         public static final String Facebook = "facebook";
@@ -230,7 +249,7 @@ public class BDefines {
         public static final String Custom = "custom";
     }
 
-    public static final class ProviderInt{
+    public static final class ProviderInt {
         public static final int Password = 1;
         public static final int Facebook = 2;
         public static final int Google = 3;
@@ -239,7 +258,7 @@ public class BDefines {
         public static final int Custom = 6;
     }
 
-    public static final class Options{
+    public static final class Options {
         /**
          * if true option to send location will be available, If the google maps key is empty it wont be available.
          **/
@@ -258,18 +277,18 @@ public class BDefines {
         /**
          * If true images opened in the chat activity will be saved to the user image gallery
          * under the name assigned in the ImageDirName, Also images you pick from gallery and send will be saved.
-         * If this is disabled images will be saved to the app cache directory. 
-         *
+         * If this is disabled images will be saved to the app cache directory.
+         * <p>
          * The message list adapter will first try to load images from internal storage, Enabling this will get
          * Better performance loading images and reduce network use.
          *
          * @see #ImageDirName
-         * */
+         */
         public static boolean SaveImagesToDir = false;
 
         /**
          * The maximum amounts of lines that will be shown in the notification for incoming messages.
-         *
+         * <p>
          * Seems to have a problem when showing more then seven lines in lollipop.
          **/
         public static final int MaxInboxNotificationLines = 7;

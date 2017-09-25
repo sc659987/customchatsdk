@@ -81,7 +81,7 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
 
     public ConcurrentHashMap<String, FirebaseEventCombo> listenerAndRefs = new ConcurrentHashMap<String, FirebaseEventCombo>();
 
-    public static FirebaseEventsManager getInstance(){
+    public static FirebaseEventsManager getInstance() {
         if (instance == null)
             instance = new FirebaseEventsManager();
 
@@ -94,19 +94,20 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
     private final EventHandler handlerUserAdded = new EventHandler(this);
 
     private String observedUserEntityID = "";
-    
-    private FirebaseEventsManager(){
+
+    private FirebaseEventsManager() {
         threadsIds = Collections.synchronizedList(threadsIds);
-        handledAddedUsersToThreadIDs = Collections.synchronizedList(handledAddedUsersToThreadIDs);;
+        handledAddedUsersToThreadIDs = Collections.synchronizedList(handledAddedUsersToThreadIDs);
+        ;
         handledMessagesThreadsID = Collections.synchronizedList(handledMessagesThreadsID);
         usersIds = Collections.synchronizedList(usersIds);
         handledUsersMetaIds = Collections.synchronizedList(handledUsersMetaIds);
     }
 
-    static class EventHandler extends Handler{
+    static class EventHandler extends Handler {
         WeakReference<FirebaseEventsManager> manager;
 
-        public EventHandler(FirebaseEventsManager manager){
+        public EventHandler(FirebaseEventsManager manager) {
             super(Looper.getMainLooper());
             this.manager = new WeakReference<>(manager);
         }
@@ -115,8 +116,7 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
-            switch (msg.what)
-            {
+            switch (msg.what) {
                 case AppEvents.USER_DETAILS_CHANGED:
                     if (notNull())
                         manager.get().onUserDetailsChange((BUser) msg.obj);
@@ -159,7 +159,7 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
             }
         }
 
-        private boolean notNull(){
+        private boolean notNull() {
             return manager.get() != null;
         }
     }
@@ -168,16 +168,15 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
     public boolean onUserAddedToThread(String threadId, final String userId) {
         if (DEBUG) Timber.i("onUserAddedToThread");
 
-        for (Event e : events.values())
-        {
+        for (Event e : events.values()) {
             if (e == null)
                 continue;
 
-            if (StringUtils.isNotEmpty(e.getEntityId())  && StringUtils.isNotEmpty(threadId)
-                    &&  !e.getEntityId().equals(threadId) )
+            if (StringUtils.isNotEmpty(e.getEntityId()) && StringUtils.isNotEmpty(threadId)
+                    && !e.getEntityId().equals(threadId))
                 continue;
 
-            if(e instanceof BatchedEvent)
+            if (e instanceof BatchedEvent)
                 ((BatchedEvent) e).add(Event.Type.ThreadEvent, threadId);
 
             e.onUserAddedToThread(threadId, userId);
@@ -189,13 +188,12 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
     @Override
     public boolean onFollowerAdded(final FollowerLink follower) {
 
-        if (follower!=null)
-            for (Event  e : events.values())
-            {
+        if (follower != null)
+            for (Event e : events.values()) {
                 if (e == null)
                     continue;
 
-                if(e instanceof BatchedEvent)
+                if (e instanceof BatchedEvent)
                     ((BatchedEvent) e).add(Event.Type.FollwerEvent, follower.getBUser().getEntityID());
 
                 e.onFollowerAdded(follower);
@@ -205,12 +203,11 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
 
     @Override
     public boolean onFollowerRemoved() {
-        for ( Event  e : events.values())
-        {
-            if (e == null )
+        for (Event e : events.values()) {
+            if (e == null)
                 continue;
 
-            if(e instanceof BatchedEvent)
+            if (e instanceof BatchedEvent)
                 ((BatchedEvent) e).add(Event.Type.FollwerEvent);
 
             e.onFollowerRemoved();
@@ -221,13 +218,12 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
     @Override
     public boolean onUserToFollowAdded(final FollowerLink follower) {
 
-        if (follower!=null)
-            for (Event e : events.values())
-            {
+        if (follower != null)
+            for (Event e : events.values()) {
                 if (e == null)
                     continue;
 
-                if(e instanceof BatchedEvent)
+                if (e instanceof BatchedEvent)
                     ((BatchedEvent) e).add(Event.Type.FollwerEvent, follower.getBUser().getEntityID());
 
                 e.onUserToFollowAdded(follower);
@@ -237,12 +233,11 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
 
     @Override
     public boolean onUserToFollowRemoved() {
-        for (Event  e : events.values())
-        {
-            if (e == null )
+        for (Event e : events.values()) {
+            if (e == null)
                 continue;
 
-            if(e instanceof BatchedEvent)
+            if (e instanceof BatchedEvent)
                 ((BatchedEvent) e).add(Event.Type.FollwerEvent);
 
             e.onUserToFollowRemoved();
@@ -256,20 +251,19 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
         if (user == null)
             return false;
 
-        for ( Event e : events.values())
-        {
+        for (Event e : events.values()) {
             if (e == null)
                 continue;
 
             // We check to see if the listener specified a specific user that he wants to listen to.
             // If we could find and match the data we ignore it.
-            if (StringUtils.isNotEmpty(e.getEntityId())  && StringUtils.isNotEmpty(user.getEntityID())
-                    &&  !e.getEntityId().equals(user.getEntityID()) )
+            if (StringUtils.isNotEmpty(e.getEntityId()) && StringUtils.isNotEmpty(user.getEntityID())
+                    && !e.getEntityId().equals(user.getEntityID()))
                 continue;
 
 
-            if(e instanceof BatchedEvent)
-                ((BatchedEvent) e ).add(Event.Type.UserDetailsEvent, user.getEntityID());
+            if (e instanceof BatchedEvent)
+                ((BatchedEvent) e).add(Event.Type.UserDetailsEvent, user.getEntityID());
 
             e.onUserDetailsChange(user);
         }
@@ -280,8 +274,7 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
     @Override
     public boolean onMessageReceived(BMessage message) {
         if (DEBUG) Timber.i("onMessageReceived");
-        for (Event e : events.values())
-        {
+        for (Event e : events.values()) {
             if (e == null)
                 continue;
 
@@ -290,10 +283,10 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
             if (StringUtils.isNotEmpty(e.getEntityId()) && message.getThread() != null
                     && message.getThread().getEntityID() != null
                     && !message.getThread().getEntityID().equals(e.getEntityId()))
-                    continue;
+                continue;
 
 
-            if(e instanceof BatchedEvent)
+            if (e instanceof BatchedEvent)
                 ((BatchedEvent) e).add(Event.Type.MessageEvent, message.getEntityID());
 
             e.onMessageReceived(message);
@@ -306,37 +299,35 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
     public boolean onThreadDetailsChanged(final String threadId) {
         if (DEBUG) Timber.i("onThreadDetailsChanged");
 
-        for (Event e : events.values())
-        {
-            if (e  == null)
+        for (Event e : events.values()) {
+            if (e == null)
                 continue;
 
-            
+
             if (StringUtils.isNotEmpty(e.getEntityId()) && !threadId.equals(e.getEntityId()))
                 continue;
 
-            if(e instanceof BatchedEvent)
+            if (e instanceof BatchedEvent)
                 ((BatchedEvent) e).add(Event.Type.ThreadEvent, threadId);
 
             e.onThreadDetailsChanged(threadId);
         }
 
-         return false;
+        return false;
     }
 
     @Override
     public boolean onThreadIsAdded(String threadId) {
         if (DEBUG) Timber.i("onThreadIsAdded");
-        for (Event e : events.values())
-        {
+        for (Event e : events.values()) {
 
             if (e == null)
                 continue;
-            
+
             if (StringUtils.isNotEmpty(e.getEntityId()) && !threadId.equals(e.getEntityId()))
                 continue;
 
-            if(e instanceof BatchedEvent)
+            if (e instanceof BatchedEvent)
                 ((BatchedEvent) e).add(Event.Type.ThreadEvent, threadId);
 
             e.onThreadIsAdded(threadId);
@@ -348,21 +339,24 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
 
     /*##########################################################################################*/
 
+
+    //TODO read all thread here
     @Override
-    public void userOn(final BUser user){
+    public void userOn(final BUser user) {
 
         if (DEBUG) Timber.v("userOn, EntityID: %s", user.getEntityID());
-        
+
         observedUserEntityID = user.getEntityID();
 
         DatabaseReference userRef = FirebasePaths.userRef(observedUserEntityID);
 
+        // read any new thread added or all existing thread to be read and saved in db
         userRef.child(BFirebaseDefines.Path.BThreadPath).addChildEventListener(threadAddedListener);
 
         userRef.child(BFirebaseDefines.Path.FollowerLinks).addChildEventListener(followerEventListener);
         userRef.child(BFirebaseDefines.Path.BFollows).addChildEventListener(followsEventListener);
 
-        FirebasePaths.publicThreadsRef().addChildEventListener(threadAddedListener);
+        //FirebasePaths.publicThreadsRef().addChildEventListener(threadAddedListener);
 
         post(new Runnable() {
             @Override
@@ -374,15 +368,18 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
 
     }
 
+
+
+
+
     @Override
-    public void userOff(final BUser user){
+    public void userOff(final BUser user) {
         if (DEBUG) Timber.v("userOff, EntityID: $s", user.getEntityID());
-        
+
         BThreadWrapper wrapper;
-        for (BThread thread : user.getThreads())
-        {
+        for (BThread thread : user.getThreads()) {
             wrapper = new BThreadWrapper(thread);
-            
+
             wrapper.off();
             wrapper.messagesOff();
             wrapper.usersOff();
@@ -402,16 +399,14 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
     /**
      * Handle user meta change.
      **/
-    public void userMetaOn(String userID, Deferred<Void, Void, Void> promise){
+    public void userMetaOn(String userID, Deferred<Void, Void, Void> promise) {
 
-        if (userID.equals(getCurrentUserId()))
-        {
+        if (userID.equals(getCurrentUserId())) {
             if (DEBUG) Timber.d("handleUsersDetailsChange, Current User: %s", userID);
             return;
         }
 
-        if (handledUsersMetaIds.contains(userID))
-        {
+        if (handledUsersMetaIds.contains(userID)) {
             if (DEBUG) Timber.d("handleUsersDetailsChange, Listening.");
             return;
         }
@@ -424,7 +419,7 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
 
         UserMetaChangeListener userMetaChangeListener = new UserMetaChangeListener(userID, promise, handlerUserDetails);
 
-        FirebaseEventCombo combo = getCombo(USER_META_PREFIX  + userID, userRef.toString(), userMetaChangeListener);
+        FirebaseEventCombo combo = getCombo(USER_META_PREFIX + userID, userRef.toString(), userMetaChangeListener);
 
         userRef.addValueEventListener(combo.getListener());
     }
@@ -432,20 +427,20 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
     /**
      * Stop handling user meta change.
      **/
-    public void userMetaOff(String userID){
+    public void userMetaOff(String userID) {
         if (DEBUG) Timber.v("userMetaOff, UserId: %s", userID);
 
-        FirebaseEventCombo c = listenerAndRefs.get(USER_META_PREFIX  + userID);
-        
+        FirebaseEventCombo c = listenerAndRefs.get(USER_META_PREFIX + userID);
+
         if (c != null)
             c.breakCombo();
-        
-        listenerAndRefs.remove(USER_META_PREFIX  + userID);
+
+        listenerAndRefs.remove(USER_META_PREFIX + userID);
 
         handledUsersMetaIds.remove(userID);
     }
-    
-    public void threadUsersAddedOn(String threadId){
+
+    public void threadUsersAddedOn(String threadId) {
         // Check if handled.
         if (handledAddedUsersToThreadIDs.contains(threadId))
             return;
@@ -456,14 +451,14 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
         // This will allow us to update the users in the database
         DatabaseReference threadUsers = FirebasePaths.threadRef(threadId).child(BFirebaseDefines.Path.BUsersPath);
 
-        UserAddedListener userAddedToThreadListener= UserAddedListener.getNewInstance(observedUserEntityID, threadId, handlerUserAdded);
+        UserAddedListener userAddedToThreadListener = UserAddedListener.getNewInstance(observedUserEntityID, threadId, handlerUserAdded);
 
         FirebaseEventCombo combo = getCombo(USER_PREFIX + threadId, threadUsers.toString(), userAddedToThreadListener);
 
         threadUsers.addChildEventListener(combo.getListener());
     }
-    
-    public void threadUsersAddedOff(String threadId){
+
+    public void threadUsersAddedOff(String threadId) {
         if (DEBUG) Timber.v("handleUsersDetailsChange, EntityId: %s", threadId);
 
         FirebaseEventCombo c = listenerAndRefs.get(USER_PREFIX + threadId);
@@ -472,13 +467,13 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
             c.breakCombo();
 
         listenerAndRefs.remove(USER_PREFIX + threadId);
-        
+
         handledAddedUsersToThreadIDs.remove(threadId);
     }
-    
-    public void messagesOn(String threadId, Deferred<BThread, Void , Void> deferred){
+
+    public void messagesOn(String threadId, Deferred<BThread, Void, Void> deferred) {
         if (DEBUG) Timber.v("messagesOn, EntityID: %s", threadId);
-        
+
         // Check if handled.
         if (handledMessagesThreadsID.contains(threadId))
             return;
@@ -504,25 +499,22 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
          * (He would see his if he kill the chat because they are saved locally).
          *
          * */
-        if (thread.isDeleted() || messages.size() == 0)
-        {
+        if (thread.isDeleted() || messages.size() == 0) {
             if (DEBUG) Timber.v("Thread is Deleted, ID: %s", threadId);
-            
+
             BThreadWrapper wrapper = new BThreadWrapper(thread);
-            
+
             wrapper.threadDeletedDate().done(new DoneCallback<Long>() {
                 @Override
                 public void onDone(Long aLong) {
                     Query query = threadRef.child(BFirebaseDefines.Path.BMessagesPath);
 
                     // Not deleted
-                    if (aLong==null)
-                    {
+                    if (aLong == null) {
                         query = query.limitToLast(BDefines.MAX_MESSAGES_TO_PULL);
                     }
                     // Deleted.
-                    else
-                    {
+                    else {
                         if (DEBUG) Timber.d("Thread Deleted Value: %s", aLong);
 
                         // The plus 1 is needed so we wont receive the last message again.
@@ -534,33 +526,30 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
                     query.addChildEventListener(combo.getListener());
                 }
             })
-            .fail(new FailCallback<DatabaseError>() {
-                @Override
-                public void onFail(DatabaseError firebaseError) {
-                    // Default behavior if failed.
-                    Query query = threadRef.child(BFirebaseDefines.Path.BMessagesPath);
-                    query = query.limitToLast(BDefines.MAX_MESSAGES_TO_PULL);
+                    .fail(new FailCallback<DatabaseError>() {
+                        @Override
+                        public void onFail(DatabaseError firebaseError) {
+                            // Default behavior if failed.
+                            Query query = threadRef.child(BFirebaseDefines.Path.BMessagesPath);
+                            query = query.limitToLast(BDefines.MAX_MESSAGES_TO_PULL);
 
-                    FirebaseEventCombo combo = getCombo(MSG_PREFIX + thread.getEntityID(), query.getRef().toString(), incomingMessagesListener);
+                            FirebaseEventCombo combo = getCombo(MSG_PREFIX + thread.getEntityID(), query.getRef().toString(), incomingMessagesListener);
 
-                    query.addChildEventListener(combo.getListener());
-                }
-            });
+                            query.addChildEventListener(combo.getListener());
+                        }
+                    });
 
             return;
-        }
-        else if (messages.size() > 0)
-        {
-            if (DEBUG) Timber.d("messagesOn, Messages size:  %s, LastMessage: %s", messages.size(), messages.get(0).getText());
-            
+        } else if (messages.size() > 0) {
+            if (DEBUG)
+                Timber.d("messagesOn, Messages size:  %s, LastMessage: %s", messages.size(), messages.get(0).getText());
+
             // The plus 1 is needed so we wont receive the last message again.
             messagesQuery = messagesQuery.startAt(messages.get(0).getDate().getTime() + 1);
 
             // Set any message that received as new.
             incomingMessagesListener.setNew(true);
-        }
-        else
-        {
+        } else {
             messagesQuery = messagesQuery.limitToLast(BDefines.MAX_MESSAGES_TO_PULL);
         }
 
@@ -568,10 +557,10 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
 
         messagesQuery.addChildEventListener(combo.getListener());
     }
-    
-    public void messagesOff(String threadId){
+
+    public void messagesOff(String threadId) {
         if (DEBUG) Timber.v("messagesOff, EntityID: %s", threadId);
-        
+
         if (DEBUG) Timber.v("handleUsersDetailsChange, EntityId: %s", threadId);
 
         FirebaseEventCombo c = listenerAndRefs.get(MSG_PREFIX + threadId);
@@ -580,14 +569,13 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
             c.breakCombo();
 
         listenerAndRefs.remove(MSG_PREFIX + threadId);
-        
+
         handledMessagesThreadsID.remove(threadId);
     }
-    
-    public void threadOn(String threadId, Deferred<BThread, Void, Void> deferred){
-        if (DEBUG) Timber.v("threadOn, EntityID: %s",threadId);
-        if (!isListeningToThread(threadId))
-        {
+
+    public void threadOn(String threadId, Deferred<BThread, Void, Void> deferred) {
+        if (DEBUG) Timber.v("threadOn, EntityID: %s", threadId);
+        if (!isListeningToThread(threadId)) {
             threadsIds.add(threadId);
 
             final DatabaseReference threadRef = FirebasePaths.threadRef(threadId);
@@ -599,14 +587,13 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
             FirebaseEventCombo combo = getCombo(threadId, detailsRef.toString(), new ThreadUpdateChangeListener(threadId, handlerThread, deferred));
 
             detailsRef.addValueEventListener(combo.getListener());
-        }
-        else if (DEBUG) Timber.e("Thread is already handled..");
+        } else if (DEBUG) Timber.e("Thread is already handled..");
 
     }
-    
-    public void threadOff(String threadId){
+
+    public void threadOff(String threadId) {
         if (DEBUG) Timber.v("threadOff, EntityID: %s", threadId);
-        
+
         FirebaseEventCombo c = listenerAndRefs.get(threadId);
 
         if (c != null)
@@ -616,8 +603,8 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
 
         threadsIds.remove(threadId);
     }
-    
-    
+
+
     private ChildEventListener threadAddedListener = new ChildEventListener() {
         @Override
         public void onChildAdded(final DataSnapshot snapshot, String s) {
@@ -625,23 +612,23 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
                 @Override
                 public void run() {
 
-                    boolean publicThread =false;
+                    boolean publicThread = false;
                     String threadFirebaseID;
                     BPath path = BPath.pathWithPath(snapshot.getRef().toString());
-                    if (path.isEqualToComponent(BFirebaseDefines.Path.BPublicThreadPath))
-                    {
+                    if (path.isEqualToComponent(BFirebaseDefines.Path.BPublicThreadPath)) {
                         threadFirebaseID = path.idForIndex(0);
                         publicThread = true;
-                    }
-                    else threadFirebaseID = path.idForIndex(1);
+                    } else threadFirebaseID = path.idForIndex(1);
 
-                    if (DEBUG) Timber.i("Thread is added, Thread EntityID: %s, Listening: %s", threadFirebaseID, isListeningToThread(threadFirebaseID));
+                    if (DEBUG)
+                        Timber.i("Thread is added, Thread EntityID: %s, Listening: %s", threadFirebaseID, isListeningToThread(threadFirebaseID));
 
 
-                    if (!isListeningToThread(threadFirebaseID))
-                    {
+
+
+                    if (!isListeningToThread(threadFirebaseID)) {
                         BThreadWrapper wrapper = new BThreadWrapper(threadFirebaseID);
-                        
+
                         // Starting to listen to thread changes.
                         wrapper.on();
                         wrapper.messagesOn();
@@ -650,16 +637,14 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
                         BUser currentUser = BNetworkManager.sharedManager().getNetworkAdapter().currentUserModel();
 
                         // Add the current user to the thread if needed. Only if not public.
-                        if (!publicThread &&
-                                !wrapper.getModel().hasUser(currentUser))
-                        {
+                        if (!publicThread && !wrapper.getModel().hasUser(currentUser)) {
                             wrapper.addUser(BUserWrapper.initWithModel(currentUser));
                             BThread thread = wrapper.getModel();
                             thread.setType(BThreadEntity.Type.Private);
                             DaoCore.createEntity(thread);
                             DaoCore.connectUserAndThread(currentUser, thread);
                         }
-                        
+
                         // Triggering thread added events.
                         onThreadIsAdded(threadFirebaseID);
                     }
@@ -729,22 +714,16 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
         }
     };
 
-    /** Check to see if the given thread id is already handled by this class.
-     * @return true if handled.*/
+    /**
+     * Check to see if the given thread id is already handled by this class.
+     *
+     * @return true if handled.
+     */
     @Override
-    public boolean isListeningToThread(String entityID){
+    public boolean isListeningToThread(String entityID) {
         return threadsIds.contains(entityID);
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
     private ChildEventListener followsEventListener = new ChildEventListener() {
         @Override
@@ -784,92 +763,94 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
         }
     };
 
-    /** Remove listeners from thread id. The listener's are The thread details, messages and added users.*/
-    public void stopListeningToThread(String threadID){
+    /**
+     * Remove listeners from thread id. The listener's are The thread details, messages and added users.
+     */
+    public void stopListeningToThread(String threadID) {
         if (DEBUG) Timber.v("stopListeningToThread, ThreadID: %s", threadID);
 
         if (listenerAndRefs.containsKey(threadID) && listenerAndRefs.get(threadID) != null)
             listenerAndRefs.get(threadID).breakCombo();
 
-        if (listenerAndRefs.containsKey(MSG_PREFIX + threadID) && listenerAndRefs.get(MSG_PREFIX  + threadID) != null)
-            listenerAndRefs.get(MSG_PREFIX  + threadID).breakCombo();
+        if (listenerAndRefs.containsKey(MSG_PREFIX + threadID) && listenerAndRefs.get(MSG_PREFIX + threadID) != null)
+            listenerAndRefs.get(MSG_PREFIX + threadID).breakCombo();
 
         if (listenerAndRefs.containsKey(USER_PREFIX + threadID) && listenerAndRefs.get(USER_PREFIX + threadID) != null)
-            listenerAndRefs.get(USER_PREFIX  + threadID).breakCombo();
+            listenerAndRefs.get(USER_PREFIX + threadID).breakCombo();
 
         // Removing the combo's from the Map.
         listenerAndRefs.remove(threadID);
-        listenerAndRefs.remove(MSG_PREFIX  + threadID);
-        listenerAndRefs.remove(USER_PREFIX  + threadID);
+        listenerAndRefs.remove(MSG_PREFIX + threadID);
+        listenerAndRefs.remove(USER_PREFIX + threadID);
 
         threadsIds.remove(threadID);
         handledMessagesThreadsID.remove(threadID);
         handledAddedUsersToThreadIDs.remove(threadID);
     }
 
-    /** Get a combo object for given index, ref and listener.
-     *  The combo is used to keep the firebase ref path and their listeners so we can remove the listener when needed.*/
-    private FirebaseEventCombo getCombo(String index, String ref, FirebaseGeneralEvent listener){
+    /**
+     * Get a combo object for given index, ref and listener.
+     * The combo is used to keep the firebase ref path and their listeners so we can remove the listener when needed.
+     */
+    private FirebaseEventCombo getCombo(String index, String ref, FirebaseGeneralEvent listener) {
         FirebaseEventCombo combo = FirebaseEventCombo.getNewInstance(listener, ref);
         saveCombo(index, combo);
         return combo;
     }
 
-    /** Save the combo to the combo map.*/
-    private void saveCombo(String index, FirebaseEventCombo combo){
+    /**
+     * Save the combo to the combo map.
+     */
+    private void saveCombo(String index, FirebaseEventCombo combo) {
         listenerAndRefs.put(index, combo);
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     @Override
-    public void addEvent(Event appEvents){
+    public void addEvent(Event appEvents) {
         Event e = events.put(appEvents.getTag(), appEvents);
-        
-        if (e != null )
+
+        if (e != null)
             e.kill();
     }
 
-    /** Removes an app event by tag.*/
+    /**
+     * Removes an app event by tag.
+     */
     @Override
-    public boolean removeEventByTag(String tag){
+    public boolean removeEventByTag(String tag) {
 
         if (DEBUG) Timber.v("removeEventByTag, Tag: %s", tag);
 
-        if (StringUtils.isEmpty(tag)){
+        if (StringUtils.isEmpty(tag)) {
             return false;
         }
 
         Event e = events.remove(tag);
-        
-        if (e != null)
-        {
+
+        if (e != null) {
             if (DEBUG) Timber.i("killing event, Tag: %s", e.getTag());
             e.kill();
         }
-        
+
         return e != null;
     }
 
-    /** Check if there is a AppEvent listener with the currnt tag, Could be AppEvent or one of his child(MessageEventListener, ThreadEventListener, UserEventListener).
-     * @return true if found.*/
+    /**
+     * Check if there is a AppEvent listener with the currnt tag, Could be AppEvent or one of his child(MessageEventListener, ThreadEventListener, UserEventListener).
+     *
+     * @return true if found.
+     */
     @Override
-    public boolean isEventTagExist(String tag){
+    public boolean isEventTagExist(String tag) {
         return events.containsKey(tag);
     }
-    
-    /** 
-     * Remove all firebase listeners and all app events listeners. 
+
+    /**
+     * Remove all firebase listeners and all app events listeners.
      * After removing all class list will be cleared.
      **/
-    public void removeAll(){
+    public void removeAll() {
 
         DatabaseReference userRef = FirebasePaths.userRef(observedUserEntityID);
 
@@ -888,13 +869,12 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
 
         Iterator<String> iter = Keys.iterator();
         String key;
-        while (iter.hasNext())
-        {
+        while (iter.hasNext()) {
             key = iter.next();
-            if (DEBUG) Timber.d("Removing listener, Key: %s",  key);
+            if (DEBUG) Timber.d("Removing listener, Key: %s", key);
 
             combo = listenerAndRefs.get(key);
-            
+
             if (combo != null)
                 combo.breakCombo();
         }
@@ -905,18 +885,17 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
     }
 
     /**
-     *Clearing all the lists.
+     * Clearing all the lists.
      **/
-    private void clearLists(){
+    private void clearLists() {
         listenerAndRefs.clear();
 
         // Killing all events
-        for (Event e : events.values())
-        {
+        for (Event e : events.values()) {
             if (e != null)
                 e.kill();
         }
-        
+
         events.clear();
 
         threadsIds.clear();
@@ -926,18 +905,22 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
         handledAddedUsersToThreadIDs.clear();
         handleFollowDataChangeUsersId.clear();
     }
-    
-    /** get the current user entity so we know not to listen to his details and so on.*/
+
+    /**
+     * get the current user entity so we know not to listen to his details and so on.
+     */
     public static String getCurrentUserId() {
         return BNetworkManager.sharedManager().getNetworkAdapter().currentUserModel().getEntityID();
     }
 
-    /** Print save data of this class. Id's List and listener and refs. Used for debugging.*/
-    public void printDataReport(){
+    /**
+     * Print save data of this class. Id's List and listener and refs. Used for debugging.
+     */
+    public void printDataReport() {
         for (String s : threadsIds)
-            Timber.i("Listening to thread ID: "  + s);
+            Timber.i("Listening to thread ID: " + s);
 
-        for (String u: usersIds)
+        for (String u : usersIds)
             Timber.i("handled users details, user ID: %s", u);
 
         for (String s : handledAddedUsersToThreadIDs)
@@ -947,7 +930,7 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
             Timber.i("handled messages, Thread ID: %s", s);
     }
 
-    private void post(Runnable runnable){
+    private void post(Runnable runnable) {
         Executor.getInstance().execute(runnable);
     }
 
@@ -957,7 +940,7 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
         // Sets the Time Unit to seconds
         private static final TimeUnit KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS;
 
-        private LinkedBlockingQueue<Runnable>  workQueue = new LinkedBlockingQueue<Runnable>();
+        private LinkedBlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
         /*
          * Gets the number of available cores
          * (not always the same as the maximum number of cores)
@@ -977,11 +960,11 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
             return instance;
         }
 
-        private Executor(){
-            
+        private Executor() {
+
             if (NUMBER_OF_CORES <= 0)
                 NUMBER_OF_CORES = 2;
-            
+
             // Creates a thread pool manager
             threadPool = new ThreadPoolExecutor(
                     NUMBER_OF_CORES,       // Initial pool size
@@ -991,11 +974,11 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
                     workQueue);
         }
 
-        public void execute(Runnable runnable){
+        public void execute(Runnable runnable) {
             threadPool.execute(runnable);
         }
 
-        private void restart(){
+        private void restart() {
             threadPool.shutdownNow();
             instance = new Executor();
         }

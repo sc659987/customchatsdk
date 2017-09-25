@@ -8,6 +8,7 @@ public class StudyCopterStudentDetail {
 
     private String email;
     private String studentid;
+    private String name;
     private String courseid;
     private String deviceid;
     private String coursevalidity;
@@ -30,6 +31,14 @@ public class StudyCopterStudentDetail {
 
     public void setStudentid(String studentid) {
         this.studentid = studentid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getCourseid() {

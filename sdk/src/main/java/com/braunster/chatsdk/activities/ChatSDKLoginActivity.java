@@ -28,6 +28,7 @@ import com.braunster.chatsdk.object.BError;
 import com.studycopter.network.CourseType;
 import com.studycopter.network.RetrofitInstance;
 import com.studycopter.network.StudyCopterService;
+import com.studycopter.network.Utils;
 import com.studycopter.network.model.StudyCopterStudentDetail;
 import com.studycopter.network.responseprocessor.ResultProcessor;
 
@@ -35,8 +36,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 
+import java.io.IOException;
 import java.util.Map;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -107,21 +110,16 @@ public class ChatSDKLoginActivity extends ChatSDKAbstractLoginActivity {
     @Override
     protected void afterLogin() {
         super.afterLogin();
-
         // Updating the version name.
         BUser curUser = getNetworkAdapter().currentUserModel();
-
         String version = BDefines.BAppVersion,
                 metaVersion = curUser.metaStringForKey(BDefines.Keys.BVersion);
-
         if (StringUtils.isNotEmpty(version)) {
             if (StringUtils.isEmpty(metaVersion) || !metaVersion.equals(version)) {
                 curUser.setMetadataString(BDefines.Keys.BVersion, version);
             }
-
             DaoCore.updateEntity(curUser);
         }
-
         startMainActivity();
     }
 
@@ -129,16 +127,15 @@ public class ChatSDKLoginActivity extends ChatSDKAbstractLoginActivity {
         if (!checkFields())
             return;
         showProgDialog(getString(R.string.connecting));
-        this.studyCopterService.loginToStudyCopter(etEmail.toString(),
-                etPass.toString(), "1", "2",
+        this.studyCopterService.loginToStudyCopter(etEmail.getText().toString(),
+                Utils.MD5(etPass.getText().toString()), "1", "2",
                 CourseType.IBPS.toString())
-                .enqueue(new Callback<String>() {
+                .enqueue(new Callback<StudyCopterStudentDetail>() {
                     @Override
-                    public void onResponse(Call<String> call, Response<String> response) {
+                    public void onResponse(Call<StudyCopterStudentDetail> call, Response<StudyCopterStudentDetail> response) {
                         if (response.isSuccessful()) {
-                            String result = response.body();
-                            StudyCopterStudentDetail detail = ResultProcessor.fromResponseString(result);
-                            //TODO save in preference
+                            StudyCopterStudentDetail detail = response.body();
+                            //TODO save in preference, find out why
                             if (detail != null) {
                                 Map<String, Object> data = AbstractNetworkAdapter.getMap(
                                         new String[]{BDefines.Prefs.LoginTypeKey, BDefines.Prefs.TokenKey},
@@ -158,12 +155,15 @@ public class ChatSDKLoginActivity extends ChatSDKAbstractLoginActivity {
                                                 dismissProgDialog();
                                             }
                                         });
+                            } else {
+                                dismissProgDialog();
                             }
+                        } else {
+                            dismissProgDialog();
                         }
                     }
-
                     @Override
-                    public void onFailure(Call<String> call, Throwable t) {
+                    public void onFailure(Call<StudyCopterStudentDetail> call, Throwable t) {
                         dismissProgDialog();
                     }
                 });

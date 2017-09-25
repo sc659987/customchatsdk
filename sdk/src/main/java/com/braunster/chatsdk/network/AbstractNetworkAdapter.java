@@ -81,10 +81,6 @@ public abstract class AbstractNetworkAdapter {
     public AbstractNetworkAdapter(Context context){
         this.context = context;
     }
-
-    
-    
-
     
     public abstract Promise<Object, BError, Void> authenticateWithMap(Map<String, Object> details);
 

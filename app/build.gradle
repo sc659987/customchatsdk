@@ -16,7 +16,7 @@ android {
 
 
     defaultConfig {
-        applicationId "com.braunster.androidchatsdk.app"
+        applicationId "com.studycopter.tutor.chat.app"
 
         multiDexEnabled = false
         minSdkVersion Integer.parseInt(project.MIN_SDK)

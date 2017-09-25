@@ -11,7 +11,7 @@ import com.backendless.messaging.PublishOptions;
 import com.backendless.messaging.PushBroadcastMask;
 import com.backendless.messaging.PushPolicyEnum;
 import com.backendless.services.messaging.MessageStatus;
-import com.braunster.androidchatsdk.firebaseplugin.R;
+import com.studycopter.tutor.chat.firebase.R;
 import com.braunster.chatsdk.Utils.Debug;
 import com.braunster.chatsdk.interfaces.BPushHandler;
 import com.braunster.chatsdk.interfaces.BUploadHandler;

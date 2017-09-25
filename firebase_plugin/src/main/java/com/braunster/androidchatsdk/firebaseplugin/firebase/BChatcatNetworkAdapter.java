@@ -10,7 +10,7 @@ package com.braunster.androidchatsdk.firebaseplugin.firebase;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.braunster.androidchatsdk.firebaseplugin.R;
+import com.studycopter.tutor.chat.firebase.R;
 import com.braunster.androidchatsdk.firebaseplugin.firebase.backendless.ChatSDKReceiver;
 import com.braunster.androidchatsdk.firebaseplugin.firebase.wrappers.BMessageWrapper;
 import com.braunster.androidchatsdk.firebaseplugin.firebase.wrappers.BThreadWrapper;

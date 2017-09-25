@@ -11,7 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.backendless.push.BackendlessBroadcastReceiver;
-import com.braunster.androidchatsdk.firebaseplugin.R;
+import com.studycopter.tutor.chat.firebase.R;
 import com.braunster.androidchatsdk.firebaseplugin.firebase.wrappers.BThreadWrapper;
 import com.braunster.androidchatsdk.firebaseplugin.firebase.wrappers.BUserWrapper;
 import com.braunster.chatsdk.Utils.Debug;

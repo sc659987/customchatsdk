@@ -1,15 +1,13 @@
-package com.braunster.androidchatsdk.app;
+package com.studycopter.tutor.chat.app;
 
 import android.support.multidex.MultiDex;
 import android.support.multidex.MultiDexApplication;
 
 import com.braunster.androidchatsdk.firebaseplugin.firebase.BChatcatNetworkAdapter;
 import com.braunster.chatsdk.Utils.helper.ChatSDKUiHelper;
-import com.braunster.chatsdk.network.AbstractNetworkAdapter;
 import com.braunster.chatsdk.network.BDefines;
 import com.braunster.chatsdk.network.BNetworkManager;
-
-import java.util.Map;
+import com.studycopter.tutor.chat.app.BuildConfig;
 
 import timber.log.Timber;
 
