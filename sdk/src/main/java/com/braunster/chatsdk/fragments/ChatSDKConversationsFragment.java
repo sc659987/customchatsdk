@@ -41,11 +41,8 @@ public class ChatSDKConversationsFragment extends ChatSDKAbstractConversationsFr
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         mainView = inflater.inflate(R.layout.chat_sdk_activity_threads, container, false);
-
         initViews();
-
         loadDataOnBackground();
-
         return mainView;
     }
 

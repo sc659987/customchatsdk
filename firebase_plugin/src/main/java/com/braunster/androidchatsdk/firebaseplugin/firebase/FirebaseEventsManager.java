@@ -37,6 +37,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.Deferred;
@@ -46,8 +47,10 @@ import org.jdeferred.FailCallback;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -353,6 +356,7 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
         // read any new thread added or all existing thread to be read and saved in db
         userRef.child(BFirebaseDefines.Path.BThreadPath).addChildEventListener(threadAddedListener);
 
+
         userRef.child(BFirebaseDefines.Path.FollowerLinks).addChildEventListener(followerEventListener);
         userRef.child(BFirebaseDefines.Path.BFollows).addChildEventListener(followsEventListener);
 
@@ -367,9 +371,6 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
         });
 
     }
-
-
-
 
 
     @Override
@@ -605,6 +606,24 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
     }
 
 
+    private ValueEventListener changeInThread = new ValueEventListener() {
+        int count = 1;
+
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            System.out.println(dataSnapshot.getKey());
+            System.out.println("serial number{{" + count++ + "}}" + dataSnapshot.getValue().toString());
+
+
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
     private ChildEventListener threadAddedListener = new ChildEventListener() {
         @Override
         public void onChildAdded(final DataSnapshot snapshot, String s) {
@@ -624,26 +643,29 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
                         Timber.i("Thread is added, Thread EntityID: %s, Listening: %s", threadFirebaseID, isListeningToThread(threadFirebaseID));
 
 
-
-
                     if (!isListeningToThread(threadFirebaseID)) {
-                        BThreadWrapper wrapper = new BThreadWrapper(threadFirebaseID);
+
+
+                        threadsIds.add(threadFirebaseID);
+                        FirebasePaths.threadRef().child(threadFirebaseID).addValueEventListener(changeInThread);
+                        //BThreadWrapper wrapper = new BThreadWrapper(threadFirebaseID);
 
                         // Starting to listen to thread changes.
-                        wrapper.on();
-                        wrapper.messagesOn();
-                        wrapper.usersOn();
+                        //wrapper.on();
+                        //wrapper.messagesOn();
+                        //wrapper.usersOn();
 
-                        BUser currentUser = BNetworkManager.sharedManager().getNetworkAdapter().currentUserModel();
+                        //BUser currentUser = BNetworkManager.sharedManager().getNetworkAdapter().currentUserModel();
 
                         // Add the current user to the thread if needed. Only if not public.
-                        if (!publicThread && !wrapper.getModel().hasUser(currentUser)) {
-                            wrapper.addUser(BUserWrapper.initWithModel(currentUser));
-                            BThread thread = wrapper.getModel();
-                            thread.setType(BThreadEntity.Type.Private);
-                            DaoCore.createEntity(thread);
-                            DaoCore.connectUserAndThread(currentUser, thread);
-                        }
+                        //if (!publicThread && !wrapper.getModel().hasUser(currentUser)) {
+                        //wrapper.addUser(BUserWrapper.initWithModel(currentUser));
+                        //BThread thread = wrapper.getModel();
+                        //thread.setType(BThreadEntity.Type.Private);
+                        //DaoCore.createEntity(thread);
+                        //DaoCore.connectUserAndThread(currentUser, thread);
+                        //}
+
 
                         // Triggering thread added events.
                         onThreadIsAdded(threadFirebaseID);
@@ -674,6 +696,7 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
         }
         //endregion
     };
+
 
     private ChildEventListener followerEventListener = new ChildEventListener() {
         @Override

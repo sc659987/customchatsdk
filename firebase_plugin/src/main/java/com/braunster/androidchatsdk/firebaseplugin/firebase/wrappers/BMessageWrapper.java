@@ -54,17 +54,15 @@ public class BMessageWrapper extends EntityWrapper<BMessage> {
     
     Map<String, Object> serialize(){
         Map<String, Object> values = new HashMap<String, Object>();
-
         values.put(BDefines.Keys.BPayload, model.getText());
         values.put(BDefines.Keys.BDate, ServerValue.TIMESTAMP);
         values.put(BDefines.Keys.BType, model.getType());
         values.put(BDefines.Keys.BUserFirebaseId, model.getBUserSender().getEntityID());
-
-
         return values;
     }
 
-    @SuppressWarnings("all") void deserialize(DataSnapshot snapshot){
+    @SuppressWarnings("all")
+    void deserialize(DataSnapshot snapshot){
         Map<String, Object> value = (Map<String, Object>) snapshot.getValue();
         if (DEBUG) Timber.v("deserialize, Value: %s", value);
         if (value == null) return;

@@ -86,8 +86,7 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
 
         listThreads.setAdapter(adapter);
 
-        if (onItemClickListener==null)
-        {
+        if (onItemClickListener==null) {
             onItemClickListener = new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

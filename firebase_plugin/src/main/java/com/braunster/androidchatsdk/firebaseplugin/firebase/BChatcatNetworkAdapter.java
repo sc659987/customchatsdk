@@ -137,7 +137,6 @@ public class BChatcatNetworkAdapter extends BFirebaseNetworkAdapter {
                     wrapper.push().done(new DoneCallback<BUser>() {
                         @Override
                         public void onDone(BUser u) {
-
                             if (DEBUG) Timber.v("OnDone, user was pushed from firebase.");
                             resetAuth();
                             deferred.resolve(u);
@@ -722,8 +721,7 @@ public class BChatcatNetworkAdapter extends BFirebaseNetworkAdapter {
                 if (masterProgress.getFail() + masterProgress.getDone() == masterProgress.getTotal())
                 {
                     // Reject the promise if all promisses failed.
-                    if (masterProgress.getFail() == masterProgress.getTotal())
-                    {
+                    if (masterProgress.getFail() == masterProgress.getTotal()) {
                         deferred.reject(BError.getError(BError.Code.OPERATION_FAILED, "All promises failed"));
                     }
                     else

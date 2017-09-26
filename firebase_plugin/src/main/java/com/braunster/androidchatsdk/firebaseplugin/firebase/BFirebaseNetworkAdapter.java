@@ -234,8 +234,7 @@ public abstract class BFirebaseNetworkAdapter extends AbstractNetworkAdapter {
                 break;
             case Custom:
                 AbstractNetworkAdapter.provider = BDefines.ProviderString.Custom;
-                FirebaseAuth.getInstance()
-                        .signInWithCustomToken((String) details.get(BDefines.Prefs.TokenKey))
+                FirebaseAuth.getInstance().signInWithCustomToken((String) details.get(BDefines.Prefs.TokenKey))
                         .addOnCompleteListener(resultHandler);
                 break;
             default:

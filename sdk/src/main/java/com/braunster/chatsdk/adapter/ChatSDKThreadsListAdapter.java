@@ -26,6 +26,7 @@ import timber.log.Timber;
 /**
  * Created by itzik on 6/16/2014.
  */
+// this function is
 public class ChatSDKThreadsListAdapter extends ChatSDKAbstractThreadsListAdapter<ChatSDKAbstractThreadsListAdapter.ThreadListItem> {
 
     private static final String TAG = ChatSDKThreadsListAdapter.class.getSimpleName();
@@ -48,20 +49,18 @@ public class ChatSDKThreadsListAdapter extends ChatSDKAbstractThreadsListAdapter
 
         thread = threadItems.get(position);
 
-        if ( row == null)
-        {
+        if (row == null) {
             holder = new ViewHolder();
-            row =  ( (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE) ).inflate(R.layout.chat_sdk_row_threads, null);
+            row = ((LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.chat_sdk_row_threads, null);
             holder.txtName = (TextView) row.findViewById(R.id.chat_sdk_txt);
             holder.txtLastMsg = (TextView) row.findViewById(R.id.txt_last_message);
             holder.txtDate = (TextView) row.findViewById(R.id.txt_last_message_date);
             holder.imgIcon = (CircleImageView) row.findViewById(R.id.img_thread_image);
-            holder.txtUnreadMessagesAmount= (TextView) row.findViewById(R.id.txt_unread_messages);
+            holder.txtUnreadMessagesAmount = (TextView) row.findViewById(R.id.txt_unread_messages);
             holder.indicator = row.findViewById(R.id.chat_sdk_indicator);
 
             row.setTag(holder);
-        }
-        else
+        } else
             holder = (ViewHolder) row.getTag();
 
         holder.txtName.setText(thread.getName());
@@ -70,14 +69,12 @@ public class ChatSDKThreadsListAdapter extends ChatSDKAbstractThreadsListAdapter
 
         int unreadMsg = thread.getUnreadMessagesAmount();
         if (DEBUG) Timber.d("Unread messages amount: %s", unreadMsg);
-        if (unreadMsg!=0 &&  thread.isPrivate)
-        {
+        if (unreadMsg != 0 && thread.isPrivate) {
             holder.txtUnreadMessagesAmount.setText(String.valueOf(unreadMsg));
             holder.txtUnreadMessagesAmount.setVisibility(View.VISIBLE);
 
             holder.showUnreadIndicator();
-        }
-        else {
+        } else {
             holder.hideUnreadIndicator();
             holder.txtUnreadMessagesAmount.setVisibility(View.INVISIBLE);
         }
