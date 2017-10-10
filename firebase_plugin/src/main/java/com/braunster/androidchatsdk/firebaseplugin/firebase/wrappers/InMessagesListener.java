@@ -81,8 +81,7 @@ public class InMessagesListener extends FirebaseGeneralEvent {
 
                     
                     // Checking to see if this thread was deleted.
-                    if (thread.isDeleted())
-                    {
+                    if (thread.isDeleted()) {
                         if (DEBUG) Timber.v("Thread was Deleted");
                         return;
                     }

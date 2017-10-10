@@ -86,7 +86,6 @@ public abstract class BFirebaseNetworkAdapter extends AbstractNetworkAdapter {
                 context.getString(R.string.backendless_secret_key), context.getString(R.string.backendless_app_version));
     }
 
-
     /**
      * Indicator for the current state of the authentication process.
      **/

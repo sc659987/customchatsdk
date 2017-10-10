@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import com.braunster.androidchatsdk.firebaseplugin.firebase.listener.FirebaseThreadDetailsChangeListener;
 import com.braunster.androidchatsdk.firebaseplugin.firebase.wrappers.BThreadWrapper;
 import com.braunster.androidchatsdk.firebaseplugin.firebase.wrappers.BUserWrapper;
 import com.braunster.androidchatsdk.firebaseplugin.firebase.wrappers.InMessagesListener;
@@ -101,7 +102,6 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
     private FirebaseEventsManager() {
         threadsIds = Collections.synchronizedList(threadsIds);
         handledAddedUsersToThreadIDs = Collections.synchronizedList(handledAddedUsersToThreadIDs);
-        ;
         handledMessagesThreadsID = Collections.synchronizedList(handledMessagesThreadsID);
         usersIds = Collections.synchronizedList(usersIds);
         handledUsersMetaIds = Collections.synchronizedList(handledUsersMetaIds);
@@ -220,7 +220,6 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
 
     @Override
     public boolean onUserToFollowAdded(final FollowerLink follower) {
-
         if (follower != null)
             for (Event e : events.values()) {
                 if (e == null)
@@ -473,6 +472,7 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
     }
 
     public void messagesOn(String threadId, Deferred<BThread, Void, Void> deferred) {
+
         if (DEBUG) Timber.v("messagesOn, EntityID: %s", threadId);
 
         // Check if handled.
@@ -481,11 +481,16 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
 
         handledMessagesThreadsID.add(threadId);
 
+        // point to individual thread
         final DatabaseReference threadRef = FirebasePaths.threadRef(threadId);
+
+        // point to nested 'message' label
         Query messagesQuery = threadRef.child(BFirebaseDefines.Path.BMessagesPath);
 
+        // fetch the thread from database
         final BThread thread = DaoCore.fetchOrCreateEntityWithEntityID(BThread.class, threadId);
 
+        // get list of message
         final List<BMessage> messages = thread.getMessagesWithOrder(DaoCore.ORDER_DESC);
 
         final InMessagesListener incomingMessagesListener = new InMessagesListener(handlerMessages, threadId, deferred);
@@ -505,28 +510,29 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
 
             BThreadWrapper wrapper = new BThreadWrapper(thread);
 
-            wrapper.threadDeletedDate().done(new DoneCallback<Long>() {
-                @Override
-                public void onDone(Long aLong) {
-                    Query query = threadRef.child(BFirebaseDefines.Path.BMessagesPath);
+            wrapper.threadDeletedDate()
+                    .done(new DoneCallback<Long>() {
+                        @Override
+                        public void onDone(Long aLong) {
+                            Query query = threadRef.child(BFirebaseDefines.Path.BMessagesPath);
 
-                    // Not deleted
-                    if (aLong == null) {
-                        query = query.limitToLast(BDefines.MAX_MESSAGES_TO_PULL);
-                    }
-                    // Deleted.
-                    else {
-                        if (DEBUG) Timber.d("Thread Deleted Value: %s", aLong);
+                            // Not deleted
+                            if (aLong == null) {
+                                query = query.limitToLast(BDefines.MAX_MESSAGES_TO_PULL);
+                            }
+                            // Deleted.
+                            else {
+                                if (DEBUG) Timber.d("Thread Deleted Value: %s", aLong);
 
-                        // The plus 1 is needed so we wont receive the last message again.
-                        query = query.startAt(aLong);
-                    }
+                                // The plus 1 is needed so we wont receive the last message again.
+                                query = query.startAt(aLong);
+                            }
 
-                    FirebaseEventCombo combo = getCombo(MSG_PREFIX + thread.getEntityID(), query.getRef().toString(), incomingMessagesListener);
+                            FirebaseEventCombo combo = getCombo(MSG_PREFIX + thread.getEntityID(), query.getRef().toString(), incomingMessagesListener);
 
-                    query.addChildEventListener(combo.getListener());
-                }
-            })
+                            query.addChildEventListener(combo.getListener());
+                        }
+                    })
                     .fail(new FailCallback<DatabaseError>() {
                         @Override
                         public void onFail(DatabaseError firebaseError) {
@@ -534,7 +540,8 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
                             Query query = threadRef.child(BFirebaseDefines.Path.BMessagesPath);
                             query = query.limitToLast(BDefines.MAX_MESSAGES_TO_PULL);
 
-                            FirebaseEventCombo combo = getCombo(MSG_PREFIX + thread.getEntityID(), query.getRef().toString(), incomingMessagesListener);
+                            FirebaseEventCombo combo = getCombo(MSG_PREFIX + thread.getEntityID(),
+                                    query.getRef().toString(), incomingMessagesListener);
 
                             query.addChildEventListener(combo.getListener());
                         }
@@ -578,51 +585,27 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
         if (DEBUG) Timber.v("threadOn, EntityID: %s", threadId);
         if (!isListeningToThread(threadId)) {
             threadsIds.add(threadId);
-
             final DatabaseReference threadRef = FirebasePaths.threadRef(threadId);
-
             // Add an observer to the thread details so we get
             // updated when the thread details change
             DatabaseReference detailsRef = threadRef.child(BFirebaseDefines.Path.BDetailsPath);
-
-            FirebaseEventCombo combo = getCombo(threadId, detailsRef.toString(), new ThreadUpdateChangeListener(threadId, handlerThread, deferred));
-
+            FirebaseEventCombo combo = getCombo(threadId, detailsRef.toString(),
+                    new ThreadUpdateChangeListener(threadId, handlerThread, deferred));
             detailsRef.addValueEventListener(combo.getListener());
         } else if (DEBUG) Timber.e("Thread is already handled..");
-
     }
 
     public void threadOff(String threadId) {
         if (DEBUG) Timber.v("threadOff, EntityID: %s", threadId);
-
         FirebaseEventCombo c = listenerAndRefs.get(threadId);
-
         if (c != null)
             c.breakCombo();
-
         listenerAndRefs.remove(threadId);
-
         threadsIds.remove(threadId);
     }
 
 
-    private ValueEventListener changeInThread = new ValueEventListener() {
-        int count = 1;
-
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            System.out.println(dataSnapshot.getKey());
-            System.out.println("serial number{{" + count++ + "}}" + dataSnapshot.getValue().toString());
-
-
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-    };
+    private ChildEventListener changeInThread = new FirebaseThreadDetailsChangeListener();
 
     private ChildEventListener threadAddedListener = new ChildEventListener() {
         @Override
@@ -630,7 +613,6 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
             post(new Runnable() {
                 @Override
                 public void run() {
-
                     boolean publicThread = false;
                     String threadFirebaseID;
                     BPath path = BPath.pathWithPath(snapshot.getRef().toString());
@@ -641,13 +623,16 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
 
                     if (DEBUG)
                         Timber.i("Thread is added, Thread EntityID: %s, Listening: %s", threadFirebaseID, isListeningToThread(threadFirebaseID));
-
-
                     if (!isListeningToThread(threadFirebaseID)) {
-
-
                         threadsIds.add(threadFirebaseID);
-                        FirebasePaths.threadRef().child(threadFirebaseID).addValueEventListener(changeInThread);
+                        FirebasePaths.threadRef().child(threadFirebaseID).addChildEventListener(changeInThread);
+
+                        // TODO
+                        // 1. create a thread in db or retrieve
+                        // 2. Update thread in db as private
+                        // 3. connect to current user.
+
+
                         //BThreadWrapper wrapper = new BThreadWrapper(threadFirebaseID);
 
                         // Starting to listen to thread changes.
@@ -665,7 +650,6 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
                         //DaoCore.createEntity(thread);
                         //DaoCore.connectUserAndThread(currentUser, thread);
                         //}
-
 
                         // Triggering thread added events.
                         onThreadIsAdded(threadFirebaseID);
@@ -696,7 +680,6 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
         }
         //endregion
     };
-
 
     private ChildEventListener followerEventListener = new ChildEventListener() {
         @Override

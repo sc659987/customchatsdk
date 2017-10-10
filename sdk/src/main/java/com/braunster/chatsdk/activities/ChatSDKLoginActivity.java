@@ -30,16 +30,13 @@ import com.studycopter.network.RetrofitInstance;
 import com.studycopter.network.StudyCopterService;
 import com.studycopter.network.Utils;
 import com.studycopter.network.model.StudyCopterStudentDetail;
-import com.studycopter.network.responseprocessor.ResultProcessor;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 
-import java.io.IOException;
 import java.util.Map;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -132,7 +129,8 @@ public class ChatSDKLoginActivity extends ChatSDKAbstractLoginActivity {
                 CourseType.IBPS.toString())
                 .enqueue(new Callback<StudyCopterStudentDetail>() {
                     @Override
-                    public void onResponse(Call<StudyCopterStudentDetail> call, Response<StudyCopterStudentDetail> response) {
+                    public void onResponse(Call<StudyCopterStudentDetail> call,
+                                           Response<StudyCopterStudentDetail> response) {
                         if (response.isSuccessful()) {
                             StudyCopterStudentDetail detail = response.body();
                             //TODO save in preference, find out why

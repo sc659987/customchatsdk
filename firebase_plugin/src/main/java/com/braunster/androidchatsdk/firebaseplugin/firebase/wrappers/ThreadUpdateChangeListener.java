@@ -47,8 +47,7 @@ public class ThreadUpdateChangeListener extends FirebaseGeneralEvent {
                 public void run() {
                     android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
-                    if (dataSnapshot.getValue() == null)
-                    {      
+                    if (dataSnapshot.getValue() == null) {
                         if (deferred != null && deferred.isPending())
                             deferred.reject(null);
                         return;
@@ -73,4 +72,5 @@ public class ThreadUpdateChangeListener extends FirebaseGeneralEvent {
     public void onCancelled(DatabaseError firebaseError) {
 
     }
+
 }

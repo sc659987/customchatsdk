@@ -71,15 +71,10 @@ public class BThreadWrapper extends EntityWrapper<BThread> {
      * Start listening to thread details changes.
      **/
     public Promise<BThread, Void , Void>  on(){
-
         if (DEBUG) Timber.v("on");
-        
         Deferred<BThread, Void , Void> deferred = new DeferredObject<>();
-
         AndroidDeferredObject<BThread, Void, Void> androidDeferredObject = new AndroidDeferredObject<BThread, Void, Void>(deferred.promise(), AndroidExecutionScope.UI);
-
         getNetworkAdapter().getEventManager().threadOn(entityId, deferred);
-        
         return androidDeferredObject.promise();
     }
 
@@ -193,8 +188,7 @@ public class BThreadWrapper extends EntityWrapper<BThread> {
         if (model.getUsers().size() > 2)
         {
             // Removing the thread from the current user thread ref.
-            DatabaseReference userThreadRef = FirebasePaths.firebaseRef()
-                .child(user.getBPath().getPath())
+            DatabaseReference userThreadRef = FirebasePaths.firebaseRef().child(user.getBPath().getPath())
                 .child(model.getBPath().getPath());
 
             // Stop listening to thread events, Details change, User added and incoming messages.

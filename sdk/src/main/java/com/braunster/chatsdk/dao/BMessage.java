@@ -68,7 +68,10 @@ public class BMessage extends BMessageEntity  {
         this.id = id;
     }
 
-    public BMessage(Long id, String entityID, java.util.Date date, Boolean isRead, String resources, String resourcesPath, String text, String imageDimensions, Integer type, Integer status, Integer delivered, Long Sender, Long threadDaoId) {
+    public BMessage(Long id, String entityID, java.util.Date date,
+                    Boolean isRead, String resources, String resourcesPath,
+                    String text, String imageDimensions, Integer type,
+                    Integer status, Integer delivered, Long Sender, Long threadDaoId) {
         this.id = id;
         this.entityID = entityID;
         this.date = date;
