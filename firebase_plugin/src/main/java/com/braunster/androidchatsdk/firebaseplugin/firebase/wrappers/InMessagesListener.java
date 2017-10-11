@@ -54,8 +54,7 @@ public class InMessagesListener extends FirebaseGeneralEvent {
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     
                     // Rejecting no value messages.
-                    if (dataSnapshot.getValue() == null)
-                    {
+                    if (dataSnapshot.getValue() == null) {
                         if (deferred != null  &&  deferred.isPending())
                             deferred.reject(null);
                         return;
@@ -68,8 +67,7 @@ public class InMessagesListener extends FirebaseGeneralEvent {
                     // Checking for null sender and that the sender isn't the current user.
                     // This will make sure we wont notify user for his own messages.
                     if (wrapper.model.getBUserSender() != null &&
-                            !wrapper.model.getBUserSender().isMe())
-                    {
+                            !wrapper.model.getBUserSender().isMe()) {
                         // Set the message as new if was told from creator,
                         // Or if the date of the message is later then the creation of this object.
                         if (isNew)
