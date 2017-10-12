@@ -77,19 +77,23 @@ public abstract class AbstractNetworkAdapter {
 
     public BUploadHandler uploadHandler;
     public BPushHandler pushHandler;
-    
-    public AbstractNetworkAdapter(Context context){
+
+    public AbstractNetworkAdapter(Context context) {
         this.context = context;
     }
-    
+
     public abstract Promise<Object, BError, Void> authenticateWithMap(Map<String, Object> details);
 
     public abstract Promise<BUser, BError, Void> checkUserAuthenticated();
 
-    /** Send a password change request to the server.*/
+    /**
+     * Send a password change request to the server.
+     */
     public abstract Promise<Void, BError, Void> changePassword(String email, String oldPassword, String newPassword);
 
-    /** Send a reset email request to the server.*/
+    /**
+     * Send a reset email request to the server.
+     */
     public abstract Promise<Void, BError, Void> sendPasswordResetMail(String email);
 
     public abstract Promise<BUser, BError, Void> pushUser();
@@ -110,19 +114,15 @@ public abstract class AbstractNetworkAdapter {
     public abstract Promise<Boolean, BError, Void> isOnline();
 
 
-
-    
     public abstract Promise<List<BUser>, BError, Void> getFollowers(String entityId);
 
-    public abstract Promise<List<BUser>, BError, Void>  getFollows(String entityId);
+    public abstract Promise<List<BUser>, BError, Void> getFollows(String entityId);
 
     public abstract Promise<Void, BError, Void> followUser(BUser userToFollow);
 
     public abstract void unFollowUser(BUser userToUnfollow);
 
 
-
-    
     protected abstract Promise<BMessage, BError, BMessage> sendMessage(BMessage messages);
 
     /**
@@ -134,7 +134,7 @@ public abstract class AbstractNetworkAdapter {
      * When the message is fully sent the status will be changed and the onItem callback will be invoked.
      * When done or when an error occurred the calling method will be notified.
      */
-    public Promise<BMessage, BError, BMessage>  sendMessageWithText(String text, long threadId) {
+    public Promise<BMessage, BError, BMessage> sendMessageWithText(String text, long threadId) {
 
         final Deferred<BMessage, BError, BMessage> deferred = new DeferredObject<>();
 
@@ -155,9 +155,9 @@ public abstract class AbstractNetworkAdapter {
         Date date = message.getThread().getLastMessageAdded();
         if (date == null)
             date = new Date();
-        
-        message.setDate( new Date(date.getTime() + 1) );
-        
+
+        message.setDate(new Date(date.getTime() + 1));
+
         DaoCore.updateEntity(message);
 
         sendMessage(bMessage, deferred);
@@ -165,7 +165,7 @@ public abstract class AbstractNetworkAdapter {
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(!deferred.isResolved()){
+                if (!deferred.isResolved()) {
                     deferred.notify(message);
                 }
             }
@@ -181,11 +181,11 @@ public abstract class AbstractNetworkAdapter {
      * If the upload is successful we will update the message entity so the entityId given from the server will be saved.
      * When done or when an error occurred the calling method will be notified.
      *
-     * @param filePath     is a String representation of a bitmap that contain the image of the location wanted.
-     * @param location       is the Latitude and Longitude of the picked location.
+     * @param filePath is a String representation of a bitmap that contain the image of the location wanted.
+     * @param location is the Latitude and Longitude of the picked location.
      * @param threadId the id of the thread that the message is sent to.
      */
-    public  Promise<BMessage, BError, BMessage> sendMessageWithLocation(final String filePath, final LatLng location, long threadId) {
+    public Promise<BMessage, BError, BMessage> sendMessageWithLocation(final String filePath, final LatLng location, long threadId) {
 
         final Deferred<BMessage, BError, BMessage> deferred = new DeferredObject<>();
 
@@ -198,7 +198,7 @@ public abstract class AbstractNetworkAdapter {
         message.setResourcesPath(filePath);
 
         DaoCore.createEntity(message);
-        
+
         // Setting the temporary time of the message to be just after the last message that
         // was added to the thread.
         // Using this method we are avoiding time differences between the server time and the
@@ -207,7 +207,7 @@ public abstract class AbstractNetworkAdapter {
         if (date == null)
             date = new Date();
 
-        message.setDate( new Date(date.getTime() + 1) );
+        message.setDate(new Date(date.getTime() + 1));
 
         DaoCore.updateEntity(message);
 
@@ -272,7 +272,7 @@ public abstract class AbstractNetworkAdapter {
      * @param filePath is a file that contain the image. For now the file will be decoded to a Base64 image representation.
      * @param threadId the id of the thread that the message is sent to.
      */
-    public Promise<BMessage, BError, BMessage>  sendMessageWithImage(final String filePath, long threadId) {
+    public Promise<BMessage, BError, BMessage> sendMessageWithImage(final String filePath, long threadId) {
 
         final Deferred<BMessage, BError, BMessage> deferred = new DeferredObject<>();
 
@@ -284,7 +284,7 @@ public abstract class AbstractNetworkAdapter {
         message.setDelivered(BMessageEntity.Delivered.No);
 
         DaoCore.createEntity(message);
-        
+
         // Setting the temporary time of the message to be just after the last message that
         // was added to the thread.
         // Using this method we are avoiding time differences between the server time and the
@@ -293,8 +293,8 @@ public abstract class AbstractNetworkAdapter {
         if (date == null)
             date = new Date();
 
-        message.setDate( new Date(date.getTime() + 1) );
-        
+        message.setDate(new Date(date.getTime() + 1));
+
         message.setResourcesPath(filePath);
 
         DaoCore.updateEntity(message);
@@ -310,7 +310,7 @@ public abstract class AbstractNetworkAdapter {
         VolleyUtils.getBitmapCache().put(
                 VolleyUtils.BitmapCache.getCacheKey(message.getResourcesPath()),
                 thumbnail);
-        
+
         uploadImage(image, thumbnail)
                 .progress(new ProgressCallback<SaveImageProgress>() {
                     @Override
@@ -339,7 +339,7 @@ public abstract class AbstractNetworkAdapter {
         return deferred.promise();
     }
 
-    private Deferred<BMessage, BError, BMessage> sendMessage(final BMessage message, final Deferred<BMessage, BError, BMessage> deferred){
+    private Deferred<BMessage, BError, BMessage> sendMessage(final BMessage message, final Deferred<BMessage, BError, BMessage> deferred) {
 
         sendMessage(message).done(new DoneCallback<BMessage>() {
             @Override
@@ -363,22 +363,17 @@ public abstract class AbstractNetworkAdapter {
 
     public abstract Promise<List<BMessage>, Void, Void> loadMoreMessagesForThread(final BMessage fromMessage, BThread thread);
 
-    public int getUnreadMessagesAmount(boolean onePerThread){
+    public int getUnreadMessagesAmount(boolean onePerThread) {
         List<BThread> threads = currentUserModel().getThreads(BThread.Type.Private);
 
         int count = 0;
-        for (BThread t : threads)
-        {
-            if (onePerThread)
-            {
-                if(!t.isLastMessageWasRead())
-                {
+        for (BThread t : threads) {
+            if (onePerThread) {
+                if (!t.isLastMessageWasRead()) {
                     if (DEBUG) Timber.d("HasUnread, ThreadName: %s", t.displayName());
                     count++;
                 }
-            }
-            else
-            {
+            } else {
                 count += t.getUnreadMessagesAmount();
             }
         }
@@ -389,13 +384,11 @@ public abstract class AbstractNetworkAdapter {
 
     public abstract Promise<List<BUser>, BError, Integer> usersForIndex(String index, String value);
 
-    public static String processForQuery(String query){
+    public static String processForQuery(String query) {
         return StringUtils.isBlank(query) ? "" : query.replace(" ", "").toLowerCase();
     }
 
 
-
-   
     /**
      * Create thread for given users.
      * When the thread is added to the server the "onMainFinished" will be invoked,
@@ -412,13 +405,13 @@ public abstract class AbstractNetworkAdapter {
 
     public abstract Promise<BThread, BError, Void> createPublicThreadWithName(String name);
 
-    
+
     public abstract Promise<Void, BError, Void> deleteThreadWithEntityID(String entityID);
 
-    public Promise<Void, BError, Void> deleteThread(BThread thread){
+    public Promise<Void, BError, Void> deleteThread(BThread thread) {
         return deleteThreadWithEntityID(thread.getEntityID());
     }
-    
+
     public List<BThread> threadsWithType(int threadType) {
 
         if (currentUserModel() == null) {
@@ -430,45 +423,37 @@ public abstract class AbstractNetworkAdapter {
 
         // Get the thread list ordered desc by the last message added date.
         List<BThread> threadsFromDB;
-        if (threadType == BThread.Type.Private)
-        {
+        if (threadType == BThread.Type.Private) {
             if (DEBUG) Timber.d("threadItemsWithType, loading private.");
             threadsFromDB = currentUserModel().getThreads(BThread.Type.Private);
-        }
-        else threadsFromDB = DaoCore.fetchEntitiesWithProperty(BThread.class, BThreadDao.Properties.Type, threadType);
+        } else
+            threadsFromDB = DaoCore.fetchEntitiesWithProperty(BThread.class, BThreadDao.Properties.Type, threadType);
 
         List<BThread> threads = new ArrayList<BThread>();
 
-        if (threadType == BThread.Type.Public)
-        {
+        if (threadType == BThread.Type.Public) {
             for (BThread thread : threadsFromDB)
                 if (thread.getTypeSafely() == BThread.Type.Public)
                     threads.add(thread);
-        }
-        else {
+        } else {
             for (BThread thread : threadsFromDB) {
-                if (DEBUG) Timber.i("threadItemsWithType, ThreadID: %s, Deleted: %s", thread.getId(), thread.getDeleted());
+                if (DEBUG)
+                    Timber.i("threadItemsWithType, ThreadID: %s, Deleted: %s", thread.getId(), thread.getDeleted());
 
                 if (thread.isDeleted())
                     continue;
 
-                if (thread.getMessagesWithOrder(DaoCore.ORDER_DESC).size() > 0)
-                {
+                if (thread.getMessagesWithOrder(DaoCore.ORDER_DESC).size() > 0) {
                     threads.add(thread);
                     continue;
                 }
 
-                if (StringUtils.isNotBlank(thread.getCreatorEntityId()) && thread.getEntityID().equals(currentUser.getEntityID()))
-                {
+                if (StringUtils.isNotBlank(thread.getCreatorEntityId()) && thread.getEntityID().equals(currentUser.getEntityID())) {
                     threads.add(thread);
-                }
-                else
-                {
+                } else {
                     threadCreator = thread.getCreator();
-                    if (threadCreator != null )
-                    {
-                        if (threadCreator.equals(currentUser) && thread.hasUser(currentUser))
-                        {
+                    if (threadCreator != null) {
+                        if (threadCreator.equals(currentUser) && thread.hasUser(currentUser)) {
                             threads.add(thread);
                         }
                     }
@@ -476,10 +461,46 @@ public abstract class AbstractNetworkAdapter {
             }
         }
 
-        if (DEBUG) Timber.d("threadsWithType, Type: %s, Found on db: %s, Threads List Size: %s" + threadType, threadsFromDB.size(), threads.size());
+        if (DEBUG)
+            Timber.d("threadsWithType, Type: %s, Found on db: %s, Threads List Size: %s" + threadType, threadsFromDB.size(), threads.size());
 
         Collections.sort(threads, new ThreadsSorter());
 
+        return threads;
+    }
+
+
+    public <E extends ChatSDKAbstractThreadsListAdapter.ThreadListItem> List<E> threadItemWithType(
+            ChatSDKAbstractThreadsListAdapter.ThreadListItemMaker<E> itemMaker,
+            int from, int limit) {
+
+        BUser currentUser = currentUserModel();
+        BUser threadCreator;
+        List<BThread> threadsFromDB = currentUserModel().getPrivateThreadsWithLimit(from, limit);
+        List<E> threads = new ArrayList<E>();
+        for(BThread thread: threadsFromDB){
+            if (thread.isDeleted())
+                continue;
+            if (thread.getMessagesWithOrder(DaoCore.ORDER_DESC).size() > 0) {
+                threads.add(itemMaker.fromBThread(thread));
+                continue;
+            }
+            if (StringUtils.isNotBlank(thread.getCreatorEntityId())
+                    && thread.getEntityID().equals(currentUser.getEntityID())) {
+                threads.add(itemMaker.fromBThread(thread));
+            } else {
+                threadCreator = thread.getCreator();
+                if (threadCreator != null) {
+                    if (DEBUG)
+                        Timber.d("thread has creator. Entity ID: %s", thread.getEntityID());
+                    if (threadCreator.equals(currentUser) && thread.hasUser(currentUser)) {
+                        if (DEBUG) Timber.d("Current user is the creator.");
+                        threads.add(itemMaker.fromBThread(thread));
+                    }
+                }
+            }
+        }
+        Collections.sort(threads, new ThreadsItemSorter());
         return threads;
     }
 
@@ -496,48 +517,39 @@ public abstract class AbstractNetworkAdapter {
         // Get the thread list ordered desc by the last message added date.
         List<BThread> threadsFromDB;
 
-        if (threadType == BThread.Type.Private)
-        {
+        if (threadType == BThread.Type.Private) {
             if (DEBUG) Timber.v("threadItemsWithType, loading private.");
             threadsFromDB = currentUserModel().getThreads(BThread.Type.Private);
-        }
-        else threadsFromDB = DaoCore.fetchEntitiesWithProperty(BThread.class, BThreadDao.Properties.Type, threadType);
+        } else
+            threadsFromDB = DaoCore.fetchEntitiesWithProperty(BThread.class, BThreadDao.Properties.Type, threadType);
 
         List<E> threads = new ArrayList<E>();
         if (DEBUG) Timber.v("threadItemsWithType, size: " + threadsFromDB.size());
 
-        if (threadType == BThread.Type.Public)
-        {
+        if (threadType == BThread.Type.Public) {
             for (BThread thread : threadsFromDB)
                 if (thread.getTypeSafely() == BThread.Type.Public)
                     threads.add(itemMaker.fromBThread(thread));
-        }
-        else {
+        } else {
             for (BThread thread : threadsFromDB) {
                 if (DEBUG) Timber.i("threadItemsWithType, ThreadID: %s", thread.getId());
 
                 if (thread.isDeleted())
                     continue;
 
-                if (thread.getMessagesWithOrder(DaoCore.ORDER_DESC).size() > 0)
-                {
+                if (thread.getMessagesWithOrder(DaoCore.ORDER_DESC).size() > 0) {
                     threads.add(itemMaker.fromBThread(thread));
                     continue;
-                }
-                else if (DEBUG) Timber.e("threadItemsWithType, Thread has no messages.");
+                } else if (DEBUG) Timber.e("threadItemsWithType, Thread has no messages.");
 
-                if (StringUtils.isNotBlank(thread.getCreatorEntityId()) && thread.getEntityID().equals(currentUser.getEntityID()))
-                {
+                if (StringUtils.isNotBlank(thread.getCreatorEntityId()) && thread.getEntityID().equals(currentUser.getEntityID())) {
                     threads.add(itemMaker.fromBThread(thread));
-                }
-                else
-                {
+                } else {
                     threadCreator = thread.getCreator();
-                    if (threadCreator != null )
-                    {
-                        if (DEBUG) Timber.d("thread has creator. Entity ID: %s", thread.getEntityID());
-                        if (threadCreator.equals(currentUser) && thread.hasUser(currentUser))
-                        {
+                    if (threadCreator != null) {
+                        if (DEBUG)
+                            Timber.d("thread has creator. Entity ID: %s", thread.getEntityID());
+                        if (threadCreator.equals(currentUser) && thread.hasUser(currentUser)) {
                             if (DEBUG) Timber.d("Current user is the creator.");
                             threads.add(itemMaker.fromBThread(thread));
                         }
@@ -579,36 +591,33 @@ public abstract class AbstractNetworkAdapter {
         return removeUsersFromThread(thread, Arrays.asList(users));
     }
 
-    
+
     public abstract Promise<BThread, BError, Void> pushThread(BThread thread);
 
 
     public abstract String getServerURL();
 
 
-
-
-
-    public boolean backendlessEnabled(){
+    public boolean backendlessEnabled() {
         return StringUtils.isNotEmpty(context.getString(R.string.backendless_app_id)) && StringUtils.isNotEmpty(context.getString(R.string.backendless_secret_key));
     }
 
-    public boolean facebookEnabled(){
+    public boolean facebookEnabled() {
         return StringUtils.isNotEmpty(context.getString(R.string.facebook_id));
     }
 
-    public boolean googleEnabled(){
+    public boolean googleEnabled() {
         return false;
     }
 
-    public boolean twitterEnabled(){
+    public boolean twitterEnabled() {
         return (StringUtils.isNotEmpty(context.getString(R.string.twitter_consumer_key))
                 && StringUtils.isNotEmpty(context.getString(R.string.twitter_consumer_secret)))
 
                 ||
 
                 (StringUtils.isNotEmpty(context.getString(R.string.twitter_access_token))
-                && StringUtils.isNotEmpty(context.getString(R.string.twitter_access_token_secret)));
+                        && StringUtils.isNotEmpty(context.getString(R.string.twitter_access_token_secret)));
     }
 
     public void setEventManager(AbstractEventManager eventManager) {
@@ -652,7 +661,7 @@ public abstract class AbstractNetworkAdapter {
         this.authenticated = authenticated;
     }
 
-    /** 
+    /**
      * @return the current user contacts list.
      **/
     public List<BUser> getContacs() {
@@ -691,7 +700,7 @@ public abstract class AbstractNetworkAdapter {
         keyValuesEditor.apply();
     }
 
-    public void addLoginInfoData(String key, Object value){
+    public void addLoginInfoData(String key, Object value) {
         SharedPreferences.Editor keyValuesEditor = BNetworkManager.preferences.edit();
         if (value instanceof Integer)
             keyValuesEditor.putInt(key, (Integer) value);
@@ -703,11 +712,10 @@ public abstract class AbstractNetworkAdapter {
     }
 
 
-
-    public static Map<String, Object> getMap(String[] keys,  Object...values){
+    public static Map<String, Object> getMap(String[] keys, Object... values) {
         Map<String, Object> map = new HashMap<String, Object>();
 
-        for (int i = 0 ; i < keys.length; i++){
+        for (int i = 0; i < keys.length; i++) {
 
             // More values then keys entered.
             if (i == values.length)
@@ -720,51 +728,50 @@ public abstract class AbstractNetworkAdapter {
     }
 
 
-
     public Promise<String[], BError, SaveImageProgress> uploadImage(final Bitmap image, final Bitmap thumbnail) {
 
-        if(image == null || thumbnail == null) return rejectMultiple();
+        if (image == null || thumbnail == null) return rejectMultiple();
 
         final Deferred<String[], BError, SaveImageProgress> deferred = new DeferredObject<String[], BError, SaveImageProgress>();
 
         final String[] urls = new String[2];
 
         uploadHandler.uploadFile(ImageUtils.getImageByteArray(image), "image.jpg", "image/jpeg")
-            .done(new DoneCallback<String>() {
-                @Override
-                public void onDone(String url) {
-                    urls[0] = url;
+                .done(new DoneCallback<String>() {
+                    @Override
+                    public void onDone(String url) {
+                        urls[0] = url;
 
-                    uploadHandler.uploadFile(ImageUtils.getImageByteArray(thumbnail), "thumbnail.jpg", "image/jpeg")
-                            .done(new DoneCallback<String>() {
-                                @Override
-                                public void onDone(String url) {
-                                    urls[1] = url;
+                        uploadHandler.uploadFile(ImageUtils.getImageByteArray(thumbnail), "thumbnail.jpg", "image/jpeg")
+                                .done(new DoneCallback<String>() {
+                                    @Override
+                                    public void onDone(String url) {
+                                        urls[1] = url;
 
-                                    deferred.resolve(urls);
-                                }
-                            })
-                            .fail(new FailCallback<BError>() {
-                                @Override
-                                public void onFail(BError error) {
-                                    deferred.reject(error);
-                                }
-                            });
-                }
-            })
-            .fail(new FailCallback<BError>() {
-                @Override
-                public void onFail(BError error) {
-                    deferred.reject(error);
-                }
-            });
+                                        deferred.resolve(urls);
+                                    }
+                                })
+                                .fail(new FailCallback<BError>() {
+                                    @Override
+                                    public void onFail(BError error) {
+                                        deferred.reject(error);
+                                    }
+                                });
+                    }
+                })
+                .fail(new FailCallback<BError>() {
+                    @Override
+                    public void onFail(BError error) {
+                        deferred.reject(error);
+                    }
+                });
 
         return deferred.promise();
     }
 
     public Promise<String, BError, SaveImageProgress> uploadImageWithoutThumbnail(final Bitmap image) {
 
-        if(image == null) return reject();
+        if (image == null) return reject();
 
         final Deferred<String, BError, SaveImageProgress> deferred = new DeferredObject<String, BError, SaveImageProgress>();
 
@@ -785,11 +792,11 @@ public abstract class AbstractNetworkAdapter {
         return deferred.promise();
     }
 
-    private static Promise<String, BError, SaveImageProgress> reject(){
+    private static Promise<String, BError, SaveImageProgress> reject() {
         return new DeferredObject<String, BError, SaveImageProgress>().reject(new BError(BError.Code.NULL, "Image Is Null"));
     }
 
-    private static Promise<String[], BError, SaveImageProgress> rejectMultiple(){
+    private static Promise<String[], BError, SaveImageProgress> rejectMultiple() {
         return new DeferredObject<String[], BError, SaveImageProgress>().reject(new BError(BError.Code.NULL, "Image Is Null"));
     }
 }

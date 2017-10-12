@@ -19,7 +19,6 @@ import java.util.Map;
 /**
  * Created by Android on 10/11/2017.
  */
-
 public class FirebaseThreadMessageChangeListener implements ChildEventListener {
 
     private static final String TAG = "ThreadMessageChange";

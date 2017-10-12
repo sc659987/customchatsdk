@@ -24,7 +24,6 @@ public class FirebaseThreadDetailsChangeListener implements ChildEventListener {
         // TODO log as error occurred
     }
 
-
     /***
      * This function will be called back for each thread associated with user,
      * Each thread has three sub key named 'details','message','user' ,
