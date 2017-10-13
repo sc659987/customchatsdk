@@ -73,8 +73,7 @@ public class BThreadWrapper extends EntityWrapper<BThread> {
     public Promise<BThread, Void, Void> on() {
         if (DEBUG) Timber.v("on");
         Deferred<BThread, Void, Void> deferred = new DeferredObject<>();
-        AndroidDeferredObject<BThread, Void, Void>
-                androidDeferredObject = new AndroidDeferredObject<BThread, Void, Void>(deferred.promise(),
+        AndroidDeferredObject<BThread, Void, Void> androidDeferredObject = new AndroidDeferredObject<BThread, Void, Void>(deferred.promise(),
                 AndroidExecutionScope.UI);
         getNetworkAdapter().getEventManager().threadOn(entityId, deferred);
         return androidDeferredObject.promise();

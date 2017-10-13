@@ -2,6 +2,7 @@ package com.braunster.androidchatsdk.firebaseplugin.firebase.listener;
 
 import android.util.Log;
 
+import com.braunster.androidchatsdk.firebaseplugin.firebase.FirebaseEventsManager;
 import com.braunster.androidchatsdk.firebaseplugin.firebase.wrappers.BUserWrapper;
 import com.braunster.chatsdk.dao.BMessage;
 import com.braunster.chatsdk.dao.BThread;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class FirebaseThreadMessageChangeListener implements ChildEventListener {
 
     private static final String TAG = "ThreadMessageChange";
+
 
     /***
      *
@@ -85,24 +87,38 @@ public class FirebaseThreadMessageChangeListener implements ChildEventListener {
 
 
     @Override
-    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-        BPath dataSnapshotRefPath = BPath.pathWithPath(dataSnapshot.getRef().toString());
-        //Log.i(TAG, "onChildAdded" + dataSnapshot.getRef().toString());
-        Log.i(TAG, "onChildAdded related threadId: " + dataSnapshotRefPath.idForIndex(0));
-        Log.i(TAG, "onChildAdded messageId: " + dataSnapshotRefPath.idForIndex(1));
-        String relatedThreadId = dataSnapshotRefPath.idForIndex(0);
-        String messageId = dataSnapshotRefPath.idForIndex(1);
-        handleMessage(relatedThreadId, dataSnapshot);
+    public void onChildAdded(final DataSnapshot dataSnapshot, String s) {
+        FirebaseEventsManager.Executor.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+
+                BPath dataSnapshotRefPath = BPath.pathWithPath(dataSnapshot.getRef().toString());
+                //Log.i(TAG, "onChildAdded" + dataSnapshot.getRef().toString());
+                Log.i(TAG, "onChildAdded related threadId: " + dataSnapshotRefPath.idForIndex(0));
+                Log.i(TAG, "onChildAdded messageId: " + dataSnapshotRefPath.idForIndex(1));
+                String relatedThreadId = dataSnapshotRefPath.idForIndex(0);
+                String messageId = dataSnapshotRefPath.idForIndex(1);
+                handleMessage(relatedThreadId, dataSnapshot);
+            }
+        });
     }
 
     @Override
-    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-        BPath dataSnapshotRefPath = BPath.pathWithPath(dataSnapshot.getRef().toString());
-        Log.i(TAG, "onChildChanged related threadId: " + dataSnapshotRefPath.idForIndex(0));
-        Log.i(TAG, "onChildChanged messageId: " + dataSnapshotRefPath.idForIndex(1));
-        String relatedThreadId = dataSnapshotRefPath.idForIndex(0);
-        String messageId = dataSnapshotRefPath.idForIndex(1);
-        handleMessage(relatedThreadId, dataSnapshot);
+    public void onChildChanged(final DataSnapshot dataSnapshot, String s) {
+        FirebaseEventsManager.Executor.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+
+                BPath dataSnapshotRefPath = BPath.pathWithPath(dataSnapshot.getRef().toString());
+                Log.i(TAG, "onChildChanged related threadId: " + dataSnapshotRefPath.idForIndex(0));
+                Log.i(TAG, "onChildChanged messageId: " + dataSnapshotRefPath.idForIndex(1));
+                String relatedThreadId = dataSnapshotRefPath.idForIndex(0);
+                String messageId = dataSnapshotRefPath.idForIndex(1);
+                handleMessage(relatedThreadId, dataSnapshot);
+            }
+        });
     }
 
     @Override

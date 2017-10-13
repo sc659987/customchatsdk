@@ -13,6 +13,7 @@ import android.os.Message;
 
 import com.braunster.androidchatsdk.firebaseplugin.firebase.listener.FirebaseThreadDetailsChangeListener;
 import com.braunster.androidchatsdk.firebaseplugin.firebase.listener.FirebaseThreadMessageChangeListener;
+import com.braunster.androidchatsdk.firebaseplugin.firebase.listener.FirebaseThreadUsersChangeListener;
 import com.braunster.androidchatsdk.firebaseplugin.firebase.wrappers.BThreadWrapper;
 import com.braunster.androidchatsdk.firebaseplugin.firebase.wrappers.BUserWrapper;
 import com.braunster.androidchatsdk.firebaseplugin.firebase.wrappers.InMessagesListener;
@@ -39,6 +40,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.Deferred;
@@ -603,9 +605,11 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
     }
 
 
-    private ChildEventListener detailsInThreadChangedListener = new FirebaseThreadDetailsChangeListener();
+    private ValueEventListener detailsInThreadChangedListener = new FirebaseThreadDetailsChangeListener();
 
-    private ChildEventListener messageInThreadChangedListener = new FirebaseThreadMessageChangeListener();
+    private FirebaseThreadMessageChangeListener messageInThreadChangedListener = new FirebaseThreadMessageChangeListener();
+
+    private FirebaseThreadUsersChangeListener usersChangeListener = new FirebaseThreadUsersChangeListener();
 
     private ChildEventListener threadAddedListener = new ChildEventListener() {
         @Override
@@ -630,12 +634,17 @@ public class FirebaseEventsManager extends AbstractEventManager implements AppEv
                         FirebasePaths.threadRef()
                                 .child(threadFirebaseID)
                                 .child(BFirebaseDefines.Path.BDetailsPath)
-                                .addChildEventListener(detailsInThreadChangedListener);
+                                .addValueEventListener(detailsInThreadChangedListener);
 
                         FirebasePaths.threadRef()
                                 .child(threadFirebaseID)
                                 .child(BFirebaseDefines.Path.BMessagesPath)
                                 .addChildEventListener(messageInThreadChangedListener);
+
+                        FirebasePaths.threadRef().child(threadFirebaseID)
+                                .child(BFirebaseDefines.Path.BUsersPath)
+                                .addValueEventListener(usersChangeListener);
+
 
                         // 1. create a thread in db or retrieve
                         BThread currentThread = DaoCore.fetchOrCreateEntityWithEntityID(BThread.class, threadFirebaseID);

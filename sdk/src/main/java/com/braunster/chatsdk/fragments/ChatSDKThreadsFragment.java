@@ -50,7 +50,7 @@ public class ChatSDKThreadsFragment extends ChatSDKBaseFragment {
 
     private static final String TAG = ChatSDKThreadsFragment.class.getSimpleName();
     private static boolean DEBUG = Debug.ThreadsFragment;
-    public static final String APP_EVENT_TAG= "ChatRoomsFrag";
+    public static final String APP_EVENT_TAG = "ChatRoomsFrag";
 
     private ListView listThreads;
     private ChatSDKThreadsListAdapter adapter;
@@ -76,7 +76,7 @@ public class ChatSDKThreadsFragment extends ChatSDKBaseFragment {
         return mainView;
     }
 
-    private void init(LayoutInflater inflater){
+    private void init(LayoutInflater inflater) {
         mainView = inflater.inflate(R.layout.chat_sdk_activity_threads, null);
         initViews();
     }
@@ -88,7 +88,7 @@ public class ChatSDKThreadsFragment extends ChatSDKBaseFragment {
         initList();
     }
 
-    private void initList(){
+    private void initList() {
         adapter = new ChatSDKThreadsListAdapter(getActivity());
         listThreads.setAdapter(adapter);
 
@@ -107,7 +107,7 @@ public class ChatSDKThreadsFragment extends ChatSDKBaseFragment {
         if (mainView == null)
             return;
 
-        adapter.setThreadItems(BNetworkManager.sharedManager().getNetworkAdapter().threadItemsWithType(BThread.Type.Public, adapter.getItemMaker()));
+        adapter.setThreadItems(BNetworkManager.sharedManager().getNetworkAdapter().threadItemWithType(adapter.getItemMaker(), 0, 20));
     }
 
     @Override
@@ -118,14 +118,11 @@ public class ChatSDKThreadsFragment extends ChatSDKBaseFragment {
             return;
 
         final boolean isFirst;
-        if (uiUpdater != null)
-        {
+        if (uiUpdater != null) {
             isFirst = false;
             uiUpdater.setKilled(true);
             ChatSDKThreadPool.getInstance().removeSchedule(uiUpdater);
-        }
-        else
-        {
+        } else {
             isFirst = true;
         }
 
@@ -144,7 +141,7 @@ public class ChatSDKThreadsFragment extends ChatSDKBaseFragment {
 
                 Message message = new Message();
                 message.what = 1;
-                message.obj = BNetworkManager.sharedManager().getNetworkAdapter().threadItemsWithType(BThread.Type.Public, adapter.getItemMaker());
+                message.obj = BNetworkManager.sharedManager().getNetworkAdapter().threadItemWithType(adapter.getItemMaker(), 0, 20);
 
                 handler.sendMessageAtFrontOfQueue(message);
 
@@ -161,13 +158,12 @@ public class ChatSDKThreadsFragment extends ChatSDKBaseFragment {
         adapter.replaceOrAddItem((BThread) entity);
     }
 
-    private Handler handler = new Handler(Looper.getMainLooper()){
+    private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
-            switch (msg.what)
-            {
+            switch (msg.what) {
                 case 1:
                     adapter.setThreadItems((List<ChatSDKThreadsListAdapter.ThreadListItem>) msg.obj);
                     progressBar.setVisibility(View.GONE);
@@ -191,12 +187,11 @@ public class ChatSDKThreadsFragment extends ChatSDKBaseFragment {
         /* Cant use switch in the library*/
         int id = item.getItemId();
 
-        if (id == R.id.action_chat_sdk_add)
-        {
+        if (id == R.id.action_chat_sdk_add) {
             FragmentManager fm = getActivity().getFragmentManager();
             final DialogUtils.ChatSDKEditTextDialog dialog = DialogUtils.ChatSDKEditTextDialog.getInstace();
 
-            dialog.setTitleAndListen( getString(R.string.add_public_chat_dialog_title), new DialogUtils.ChatSDKEditTextDialog.EditTextDialogInterface() {
+            dialog.setTitleAndListen(getString(R.string.add_public_chat_dialog_title), new DialogUtils.ChatSDKEditTextDialog.EditTextDialogInterface() {
                 @Override
                 public void onFinished(final String s) {
 
@@ -212,9 +207,9 @@ public class ChatSDKThreadsFragment extends ChatSDKBaseFragment {
                                                 public void onDone(BThread thread) {
                                                     dismissProgDialog();
                                                     adapter.addRow(thread);
-                                                    showToast( getString(R.string.add_public_chat_dialog_toast_success_before_thread_name)
+                                                    showToast(getString(R.string.add_public_chat_dialog_toast_success_before_thread_name)
                                                             + s
-                                                            + getString(R.string.add_public_chat_dialog_toast_success_after_thread_name) ) ;
+                                                            + getString(R.string.add_public_chat_dialog_toast_success_after_thread_name));
                                                 }
                                             });
                                 }

@@ -1,22 +1,26 @@
 package com.braunster.androidchatsdk.firebaseplugin.firebase.listener;
 
-import android.util.Log;
-
+import com.braunster.androidchatsdk.firebaseplugin.firebase.FirebaseEventsManager;
+import com.braunster.chatsdk.dao.BThread;
+import com.braunster.chatsdk.dao.core.DaoCore;
+import com.braunster.chatsdk.network.BDefines;
 import com.braunster.chatsdk.network.BPath;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
-import java.util.HashMap;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * This class is listening to any changes to thread
  * <p>
  * Created by Android on 9/26/2017.
  */
-public class FirebaseThreadDetailsChangeListener implements ChildEventListener {
+public class FirebaseThreadDetailsChangeListener implements ValueEventListener {
 
     private static final String TAG = "ThreadDetailsChange";
+
 
     // this call back say firebase lost the authentication and needs to be done
     @Override
@@ -24,56 +28,65 @@ public class FirebaseThreadDetailsChangeListener implements ChildEventListener {
         // TODO log as error occurred
     }
 
-    /***
-     * This function will be called back for each thread associated with user,
-     * Each thread has three sub key named 'details','message','user' ,
-     * so if there is total 5 thread associated with user then 15
-     * times call back will be invoked. Save that in db.
-     * Fetch the thread from db and save it.
-     * @param dataSnapshot
-     * @param s
-     */
     @Override
-    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-        //Log.e(TAG, "firebase thread child added");
-        BPath dataSnapshotRefPath = BPath.pathWithPath(dataSnapshot.getRef().toString());
-        Log.i(TAG, "onChildAdded" + dataSnapshot.getRef().toString());
-        Log.i(TAG, "onChildAdded" + dataSnapshotRefPath.idForIndex(0));
-    }
-
-    /***
-     *  This is called subsequent when user gets a new message after reading the data
-     *  initially. This function too is called three time
-     *  for each sub key named 'details','messages' and 'users'
-     * @param dataSnapshot
-     * @param s
-     */
-    @Override
-    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-        BPath dataSnapshotRefPath = BPath.pathWithPath(dataSnapshot.getRef().toString());
-        Log.i(TAG, "onChildChanged" + dataSnapshot.getRef().toString());
-        Log.i(TAG, "onChildChanged" + dataSnapshotRefPath.idForIndex(0));
-        //handleMessage(dataSnapshotRefPath.idForIndex(0), dataSnapshot);
-        // save in db
+    public void onDataChange(final DataSnapshot dataSnapshot) {
+        FirebaseEventsManager.Executor.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                BPath dataSnapshotRefPath = BPath.pathWithPath(dataSnapshot.getRef().toString());
+                //Log.i(TAG, "onChildChanged" + dataSnapshot.getRef().toString());
+                //Log.i(TAG, "onChildChanged" + dataSnapshotRefPath.idForIndex(0));
+                String threadEntityId = dataSnapshotRefPath.idForIndex(0);
+                handleDetailsChange(threadEntityId, dataSnapshot);
+            }
+        });
     }
 
 
-    private void handleDetails(String threadId, HashMap snapshotData) {
-
+    private void handleDetailsChange(String threadEntityId, DataSnapshot dataSnapshot) {
+        final BThread thread = DaoCore.fetchOrCreateEntityWithEntityID(BThread.class, threadEntityId);
+        this.deserialize(thread, (java.util.Map<String, Object>) dataSnapshot.getValue());
 
     }
 
-    /***
-     * TODO later decide what to do
-     * @param dataSnapshot
-     */
-    @Override
-    public void onChildRemoved(DataSnapshot dataSnapshot) {
-        Log.i(TAG, "child removed");
+    @SuppressWarnings("all")
+    void deserialize(BThread bThread, Map<String, Object> value) {
+        if (value == null)
+            return;
+        if (value.containsKey(BDefines.Keys.BCreationDate)) {
+            if (value.get(BDefines.Keys.BCreationDate) instanceof Long) {
+                Long data = (Long) value.get(BDefines.Keys.BCreationDate);
+                if (data != null && data > 0)
+                    bThread.setCreationDate(new Date(data));
+            } else if (value.get(BDefines.Keys.BCreationDate) instanceof Double) {
+                Double data = (Double) value.get(BDefines.Keys.BCreationDate);
+                if (data != null && data > 0)
+                    bThread.setCreationDate(new Date(data.longValue()));
+            }
+        }
+        long type;
+        if (value.containsKey(BDefines.Keys.BType)) {
+            type = (Long) value.get(BDefines.Keys.BType);
+            bThread.setType((int) type);
+        }
+        if (value.containsKey(BDefines.Keys.BName) && !value.get(BDefines.Keys.BName).equals(""))
+            bThread.setName((String) value.get(BDefines.Keys.BName));
+        Long lastMessageAdded = 0L;
+        Object o = value.get(BDefines.Keys.BLastMessageAdded);
+        if (o instanceof Long)
+            lastMessageAdded = (Long) o;
+        else if (o instanceof Double)
+            lastMessageAdded = ((Double) o).longValue();
+        if (lastMessageAdded != null && lastMessageAdded > 0) {
+            Date date = new Date(lastMessageAdded);
+            if (bThread.getLastMessageAdded() == null || date.getTime() > bThread.getLastMessageAdded().getTime())
+                bThread.setLastMessageAdded(date);
+        }
+        bThread.setImageUrl((String) value.get(BDefines.Keys.BImageUrl));
+        bThread.setCreatorEntityId((String) value.get(BDefines.Keys.BCreatorEntityId));
+        DaoCore.updateEntity(bThread);
     }
 
-    @Override
-    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-        Log.i(TAG, "child moved !");
-    }
+
 }

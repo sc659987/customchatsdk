@@ -120,17 +120,19 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
         if (mainView == null)
             return;
 
-        adapter.setThreadItems(BNetworkManager.sharedManager().getNetworkAdapter().threadItemsWithType(BThread.Type.Private, adapter.getItemMaker()));
-        List<ChatSDKAbstractThreadsListAdapter.ThreadListItem> threadListItems
-                = BNetworkManager.sharedManager().getNetworkAdapter().threadItemWithType(adapter.getItemMaker(), 0, 20);
-        Log.i(TAG, threadListItems.toString());
+        //adapter.setThreadItems(BNetworkManager.sharedManager().getNetworkAdapter().threadItemsWithType(BThread.Type.Private, adapter.getItemMaker()));
+        adapter.setThreadItems(BNetworkManager
+                .sharedManager()
+                .getNetworkAdapter()
+                .threadItemWithType(adapter.getItemMaker(), 0, 20));
+
     }
 
     @Override
     public void loadDataOnBackground() {
         super.loadDataOnBackground();
 
-        if (DEBUG) timings = new TimingLogger(TAG.substring(0, 21), "loadDataOnBackground");
+        if (DEBUG) timings = new TimingLogger(TAG.substring(0, 20), "loadDataOnBackground");
 
         if (mainView == null) {
             return;
@@ -164,7 +166,11 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
                     timings.addSplit("Loading threads");
                 }
 
-                List list = BNetworkManager.sharedManager().getNetworkAdapter().threadItemsWithType(BThread.Type.Private, adapter.getItemMaker());
+                //List list = BNetworkManager.sharedManager().getNetworkAdapter().threadItemsWithType(BThread.Type.Private, adapter.getItemMaker());
+
+                List list = BNetworkManager.sharedManager()
+                        .getNetworkAdapter().threadItemWithType(adapter.getItemMaker(), 0, 20);
+
 
                 if (DEBUG) {
                     timings.addSplit("Loading threads");

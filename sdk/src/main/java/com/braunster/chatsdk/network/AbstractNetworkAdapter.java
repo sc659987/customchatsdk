@@ -477,7 +477,9 @@ public abstract class AbstractNetworkAdapter {
         BUser currentUser = currentUserModel();
         BUser threadCreator;
         List<BThread> threadsFromDB = currentUserModel().getPrivateThreadsWithLimit(from, limit);
+
         List<E> threads = new ArrayList<E>();
+
         for(BThread thread: threadsFromDB){
             if (thread.isDeleted())
                 continue;
@@ -504,67 +506,67 @@ public abstract class AbstractNetworkAdapter {
         return threads;
     }
 
-    public <E extends ChatSDKAbstractThreadsListAdapter.ThreadListItem> List<E> threadItemsWithType(int threadType, ChatSDKAbstractThreadsListAdapter.ThreadListItemMaker<E> itemMaker) {
-        if (DEBUG) Timber.v("threadItemsWithType, Type: %s", threadType);
-
-        if (currentUserModel() == null) {
-            if (DEBUG) Timber.e("threadItemsWithType, Current user is null");
-            return null;
-        }
-
-        BUser currentUser = currentUserModel(), threadCreator;
-
-        // Get the thread list ordered desc by the last message added date.
-        List<BThread> threadsFromDB;
-
-        if (threadType == BThread.Type.Private) {
-            if (DEBUG) Timber.v("threadItemsWithType, loading private.");
-            threadsFromDB = currentUserModel().getThreads(BThread.Type.Private);
-        } else
-            threadsFromDB = DaoCore.fetchEntitiesWithProperty(BThread.class, BThreadDao.Properties.Type, threadType);
-
-        List<E> threads = new ArrayList<E>();
-        if (DEBUG) Timber.v("threadItemsWithType, size: " + threadsFromDB.size());
-
-        if (threadType == BThread.Type.Public) {
-            for (BThread thread : threadsFromDB)
-                if (thread.getTypeSafely() == BThread.Type.Public)
-                    threads.add(itemMaker.fromBThread(thread));
-        } else {
-            for (BThread thread : threadsFromDB) {
-                if (DEBUG) Timber.i("threadItemsWithType, ThreadID: %s", thread.getId());
-
-                if (thread.isDeleted())
-                    continue;
-
-                if (thread.getMessagesWithOrder(DaoCore.ORDER_DESC).size() > 0) {
-                    threads.add(itemMaker.fromBThread(thread));
-                    continue;
-                } else if (DEBUG) Timber.e("threadItemsWithType, Thread has no messages.");
-
-                if (StringUtils.isNotBlank(thread.getCreatorEntityId()) && thread.getEntityID().equals(currentUser.getEntityID())) {
-                    threads.add(itemMaker.fromBThread(thread));
-                } else {
-                    threadCreator = thread.getCreator();
-                    if (threadCreator != null) {
-                        if (DEBUG)
-                            Timber.d("thread has creator. Entity ID: %s", thread.getEntityID());
-                        if (threadCreator.equals(currentUser) && thread.hasUser(currentUser)) {
-                            if (DEBUG) Timber.d("Current user is the creator.");
-                            threads.add(itemMaker.fromBThread(thread));
-                        }
-                    }
-                }
-            }
-        }
-
-        if (DEBUG) Timber.v("threadItemsWithType, Type: %s, Found on db: &s, Threads List Size: %s",
-                threadType, threadsFromDB.size(), threads.size());
-
-        Collections.sort(threads, new ThreadsItemSorter());
-
-        return threads;
-    }
+//    public <E extends ChatSDKAbstractThreadsListAdapter.ThreadListItem> List<E> threadItemsWithType(int threadType, ChatSDKAbstractThreadsListAdapter.ThreadListItemMaker<E> itemMaker) {
+//        if (DEBUG) Timber.v("threadItemsWithType, Type: %s", threadType);
+//
+//        if (currentUserModel() == null) {
+//            if (DEBUG) Timber.e("threadItemsWithType, Current user is null");
+//            return null;
+//        }
+//
+//        BUser currentUser = currentUserModel(), threadCreator;
+//
+//        // Get the thread list ordered desc by the last message added date.
+//        List<BThread> threadsFromDB;
+//
+//        if (threadType == BThread.Type.Private) {
+//            if (DEBUG) Timber.v("threadItemsWithType, loading private.");
+//            threadsFromDB = currentUserModel().getThreads(BThread.Type.Private);
+//        } else
+//            threadsFromDB = DaoCore.fetchEntitiesWithProperty(BThread.class, BThreadDao.Properties.Type, threadType);
+//
+//        List<E> threads = new ArrayList<E>();
+//        if (DEBUG) Timber.v("threadItemsWithType, size: " + threadsFromDB.size());
+//
+//        if (threadType == BThread.Type.Public) {
+//            for (BThread thread : threadsFromDB)
+//                if (thread.getTypeSafely() == BThread.Type.Public)
+//                    threads.add(itemMaker.fromBThread(thread));
+//        } else {
+//            for (BThread thread : threadsFromDB) {
+//                if (DEBUG) Timber.i("threadItemsWithType, ThreadID: %s", thread.getId());
+//
+//                if (thread.isDeleted())
+//                    continue;
+//
+//                if (thread.getMessagesWithOrder(DaoCore.ORDER_DESC).size() > 0) {
+//                    threads.add(itemMaker.fromBThread(thread));
+//                    continue;
+//                } else if (DEBUG) Timber.e("threadItemsWithType, Thread has no messages.");
+//
+//                if (StringUtils.isNotBlank(thread.getCreatorEntityId()) && thread.getEntityID().equals(currentUser.getEntityID())) {
+//                    threads.add(itemMaker.fromBThread(thread));
+//                } else {
+//                    threadCreator = thread.getCreator();
+//                    if (threadCreator != null) {
+//                        if (DEBUG)
+//                            Timber.d("thread has creator. Entity ID: %s", thread.getEntityID());
+//                        if (threadCreator.equals(currentUser) && thread.hasUser(currentUser)) {
+//                            if (DEBUG) Timber.d("Current user is the creator.");
+//                            threads.add(itemMaker.fromBThread(thread));
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        if (DEBUG) Timber.v("threadItemsWithType, Type: %s, Found on db: &s, Threads List Size: %s",
+//                threadType, threadsFromDB.size(), threads.size());
+//
+//        Collections.sort(threads, new ThreadsItemSorter());
+//
+//        return threads;
+//    }
 
 
     /**
