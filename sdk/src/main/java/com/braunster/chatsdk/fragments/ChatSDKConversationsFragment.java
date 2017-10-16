@@ -39,8 +39,7 @@ public class ChatSDKConversationsFragment extends ChatSDKAbstractConversationsFr
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-        mainView = inflater.inflate(R.layout.chat_sdk_activity_threads, container, false);
+        mainView = inflater.inflate(R.layout.chat_sdk_activity_conversion, container, false);
         initViews();
         loadDataOnBackground();
         return mainView;

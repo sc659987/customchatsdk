@@ -46,6 +46,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -480,7 +481,7 @@ public abstract class AbstractNetworkAdapter {
 
         List<E> threads = new ArrayList<E>();
 
-        for(BThread thread: threadsFromDB){
+        for (BThread thread : threadsFromDB) {
             if (thread.isDeleted())
                 continue;
             if (thread.getMessagesWithOrder(DaoCore.ORDER_DESC).size() > 0) {
@@ -504,6 +505,11 @@ public abstract class AbstractNetworkAdapter {
         }
         Collections.sort(threads, new ThreadsItemSorter());
         return threads;
+    }
+
+
+    public List<BThread> getPrivateThreadWithLimit(int from, int limit) {
+        return currentUserModel().getPrivateThreadsWithLimit(from, limit);
     }
 
 //    public <E extends ChatSDKAbstractThreadsListAdapter.ThreadListItem> List<E> threadItemsWithType(int threadType, ChatSDKAbstractThreadsListAdapter.ThreadListItemMaker<E> itemMaker) {

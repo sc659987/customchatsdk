@@ -35,6 +35,8 @@ public class FirebaseThreadUsersChangeListener implements ValueEventListener {
                         currentUser.getEntityID());
                 for (String userEntityId : userEntityIds) {
                     BUser bUser = DaoCore.fetchOrCreateEntityWithEntityID(BUser.class, userEntityId);
+                    bUser.setMetaName(((Map<String, String>) ((Map<String, Object>) dataSnapshot.getValue()).get(userEntityId)).get("name"));
+                    DaoCore.updateEntity(bUser);
                     if (!thread.hasUser(bUser))
                         DaoCore.connectUserAndThread(bUser, thread);
                 }

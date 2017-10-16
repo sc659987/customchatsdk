@@ -75,12 +75,12 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
 
     protected boolean filtering = false;
 
-    public ChatSDKAbstractThreadsListAdapter(Activity activity){
+    public ChatSDKAbstractThreadsListAdapter(Activity activity) {
         mActivity = activity;
         initMaker();
     }
 
-    public ChatSDKAbstractThreadsListAdapter(Activity activity, List<E> threadItems){
+    public ChatSDKAbstractThreadsListAdapter(Activity activity, List<E> threadItems) {
         mActivity = activity;
 
         // Prevent crash due to null pointer. When a thread will be found it could be added using AddRow or setThreadItems.
@@ -107,7 +107,9 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
         return threadItems.get(position).getType();
     }
 
-    /** Disabling the header vies from clicks.*/
+    /**
+     * Disabling the header vies from clicks.
+     */
     @Override
     public boolean isEnabled(int position) {
         return getItemViewType(position) == TYPE_THREAD;
@@ -128,7 +130,7 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
         return null;
     }
 
-    public class ViewHolder{
+    public class ViewHolder {
         public TextView txtName;
         public TextView txtDate;
         public TextView txtLastMsg;
@@ -136,40 +138,40 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
         public CircleImageView imgIcon;
         public View indicator;
 
-        public void setDefaultImg(ThreadListItem item){
+        public void setDefaultImg(ThreadListItem item) {
             if (item.getUsersAmount() > 2)
                 setMultipleUserDefaultImg();
             else
                 setTwoUsersDefaultImg();
         }
 
-        public void setMultipleUserDefaultImg(){
+        public void setMultipleUserDefaultImg() {
             imgIcon.setImageResource(R.drawable.ic_users);
         }
 
-        public void setTwoUsersDefaultImg(){
+        public void setTwoUsersDefaultImg() {
             imgIcon.setImageResource(R.drawable.ic_profile);
         }
 
-        public void showUnreadIndicator(){
+        public void showUnreadIndicator() {
             indicator.setVisibility(View.VISIBLE);
         }
 
-        public void hideUnreadIndicator(){
+        public void hideUnreadIndicator() {
             indicator.setVisibility(View.GONE);
         }
 
         public PicLoader picLoader;
 
-        public PicLoader initPicLoader(ThreadListItem threadListItem){
-            if (picLoader!=null)
+        public PicLoader initPicLoader(ThreadListItem threadListItem) {
+            if (picLoader != null)
                 picLoader.kill();
 
             picLoader = new PicLoader(threadListItem);
             return picLoader;
         }
 
-        class PicLoader implements ImageLoader.ImageListener{
+        class PicLoader implements ImageLoader.ImageListener {
 
             private boolean killed = false;
 
@@ -191,8 +193,7 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
                     return;
 
                 // If response was not immidate, i.e  image was cached we show the default image while loading
-                if (isImmediate && response.getBitmap() == null)
-                {
+                if (isImmediate && response.getBitmap() == null) {
                     setDefaultImg(threadListItem);
                     return;
                 }
@@ -221,10 +222,10 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
         public MakeThreadImage makeThreadImage;
     }
 
-    public void setPic(final ViewHolder holder, final int position){
+    public void setPic(final ViewHolder holder, final int position) {
 
         // Canceling the old task if has any.
-        if (holder.makeThreadImage!=null)
+        if (holder.makeThreadImage != null)
             holder.makeThreadImage.cancel(false);
 
         //If has image url saved load it.
@@ -243,12 +244,11 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
 //            if (DEBUG) Log.d(TAG, "UrlsString: " + thread.getImageUrl() + ", Urls length: " + urls.length);
 
             // If thread image url contain more then one url.
-            if (urls.length > 1)
-            {
+            if (urls.length > 1) {
 //                if (DEBUG) Log.d(TAG, "Thread has more then 2 users.");
 
                 // If we do not yet have size post the creation
-                if (size==0)
+                if (size == 0)
                     holder.imgIcon.post(new Runnable() {
                         @Override
                         public void run() {
@@ -261,8 +261,7 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
                             holder.makeThreadImage = new MakeThreadImage(urls, size, size, thread.getEntityId(), holder.imgIcon);
                         }
                     });
-                else
-                {
+                else {
                     if (DEBUG) Timber.d("Making thread image.");
                     //Default image while loading
                     holder.setMultipleUserDefaultImg();
@@ -271,20 +270,19 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
                 }
             }
             // Url is empty show default.
-            else
-            {
+            else {
                 holder.setDefaultImg(getItem(position));
             }
         }
     }
 
-    public void addRow(E thread){
+    public void addRow(E thread) {
         threadItems.add(thread);
 
         notifyDataSetChanged();
     }
 
-    public void addRow(BThread thread){
+    public void addRow(BThread thread) {
         addRow(itemMaker.fromBThread(thread));
     }
 
@@ -298,14 +296,13 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
 
         if (filtering) {
             filterItems(filterText);
-        }
-        else sort();
+        } else sort();
 
         notifyDataSetChanged();
     }
 
     /*Filtering option's of the list to make searches.*/
-    public void filterItems(String text){
+    public void filterItems(String text) {
         filtering = true;
         filterText = text.trim().toLowerCase();
 
@@ -313,18 +310,14 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
         List<E> contain = new ArrayList<E>();
         List<E> groups = new ArrayList<E>();
 
-        if (StringUtils.isBlank(text) || StringUtils.isEmpty(text))
-        {
+        if (StringUtils.isBlank(text) || StringUtils.isEmpty(text)) {
             this.threadItems = listData;
             filtering = false;
-        }
-        else
-        {
+        } else {
 
             List<E> filteredUsers = new ArrayList<E>();
 
-            for (E t : listData)
-            {
+            for (E t : listData) {
                 // Check if group and if has the filter
                 if (t.getUsersAmount() > 2 && t.getName().toLowerCase().contains(filterText))
                     groups.add(t);
@@ -332,8 +325,7 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
                 else if (t.getName().toLowerCase().startsWith(filterText))
                     startWith.add(t);
                     // Check if contained.
-                else if (t.getName().toLowerCase().contains(filterText))
-                {
+                else if (t.getName().toLowerCase().contains(filterText)) {
                     contain.add(t);
                 }
             }
@@ -355,22 +347,17 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
         notifyDataSetChanged();
     }
 
-    public E replaceOrAddItem(BThread thread){
+    public E replaceOrAddItem(BThread thread) {
         boolean replaced = false, exist = false;
         E item = itemMaker.fromBThread(thread);
 
-        for (int i = 0 ; i < threadItems.size() ; i++)
-        {
-            if (threadItems.get(i).entityId.equals(thread.getEntityID()))
-            {
+        for (int i = 0; i < threadItems.size(); i++) {
+            if (threadItems.get(i).entityId.equals(thread.getEntityID())) {
                 exist = true;
-                if (ThreadListItem.compare(item, threadItems.get(i)))
-                {
+                if (ThreadListItem.compare(item, threadItems.get(i))) {
                     threadItems.set(i, item);
                     replaced = true;
-                }
-                else
-                {
+                } else {
                     replaced = false;
                 }
             }
@@ -380,7 +367,7 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
             threadItems.add(itemMaker.fromBThread(thread));
 
         if (replaced || !exist) {
-            if (DEBUG) Timber.d("Notify!, %s", (replaced ? "Replaced": !exist ? "Not Exist":""));
+            if (DEBUG) Timber.d("Notify!, %s", (replaced ? "Replaced" : !exist ? "Not Exist" : ""));
             sort();
             notifyDataSetChanged();
         }
@@ -388,7 +375,7 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
         return item;
     }
 
-    protected void sort(){
+    protected void sort() {
         Collections.sort(threadItems, new ThreadsItemSorter());
     }
 
@@ -398,34 +385,35 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
 
     /**
      * Used for creating the items that would fill the list.
-     *
+     * <p>
      * If you want to add more data to your list you can extend the absract adapter after that you can extend the {@link com.braunster.chatsdk.adapter.abstracted.ChatSDKAbstractThreadsListAdapter.ThreadListItem ThreadListItem}
      * And add new variables to keep it and populate then in with your maker.
      *
      * @see com.braunster.chatsdk.adapter.abstracted.ChatSDKAbstractThreadsListAdapter.ThreadListItemMaker#fromBThread(com.braunster.chatsdk.dao.BThread)
      * @see com.braunster.chatsdk.adapter.abstracted.ChatSDKAbstractThreadsListAdapter.ThreadListItemMaker#getGroupsHeader()
      * @see @see com.braunster.chatsdk.adapter.abstracted.ChatSDKAbstractThreadsListAdapter.ThreadListItemMaker#getMorePeopleHeader
-     * */
-    public interface ThreadListItemMaker<E>{
+     */
+    public interface ThreadListItemMaker<E> {
         public E fromBThread(BThread thread);
+
         public E getGroupsHeader();
+
         public E getMorePeopleHeader();
     }
 
-    public List<ThreadListItem> makeList(List<BThread> threads){
-        List<ThreadListItem > list = new ArrayList<ThreadListItem>();
+    public List<ThreadListItem> makeList(List<BThread> threads) {
+        List<ThreadListItem> list = new ArrayList<ThreadListItem>();
         TimingLogger logger;
         if (DEBUG) logger = new TimingLogger(TAG.substring(0, 20), "makeList");
 
 //        int count= 0;
-        for (BThread thread : threads)
-        {
+        for (BThread thread : threads) {
 //            count++;
 //            if (DEBUG) logger.addSplit("fromThread" + count);
             list.add(itemMaker.fromBThread(thread));
         }
 
-        if (DEBUG){
+        if (DEBUG) {
             logger.dumpToLog();
             logger.reset(TAG.substring(0, 20), "makeList");
         }
@@ -433,7 +421,8 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
         return list;
     }
 
-    public static class ThreadListItem{
+    public static class ThreadListItem {
+
         public String entityId, name, imageUrl, lastMessageDate, lastMessageText;
         public int usersAmount = 0, unreadMessagesAmount = 0;
         public long id;
@@ -442,12 +431,16 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
 
         public int type;
 
-        public ThreadListItem(String title){
+        public ThreadListItem(String title) {
             this.name = title;
             type = TYPE_HEADER;
         }
 
-        public ThreadListItem(String entityId, String name, String imageUrl, String lastMessageDate, String lastMessageText, int usersAmount, int unreadMessagesAmount, long id, Date date, boolean isPrivate) {
+        public ThreadListItem(String entityId, String name,
+                              String imageUrl, String lastMessageDate,
+                              String lastMessageText, int usersAmount,
+                              int unreadMessagesAmount, long id,
+                              Date date, boolean isPrivate) {
             this.entityId = entityId;
             this.name = name;
             this.isPrivate = isPrivate;
@@ -465,7 +458,7 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
             return type;
         }
 
-        public static boolean compare(ThreadListItem newThread , ThreadListItem oldThread){
+        public static boolean compare(ThreadListItem newThread, ThreadListItem oldThread) {
 
             if (newThread.getLastMessageDate() == null || oldThread.getLastMessageDate() == null)
                 return true;
@@ -474,30 +467,26 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
                 return true;
             }
 
-            if (!newThread.name.equals(oldThread.name))
-            {
+            if (!newThread.name.equals(oldThread.name)) {
                 return true;
             }
 
-            if (newThread.getUsersAmount() != oldThread.getUsersAmount())
-            {
+            if (newThread.getUsersAmount() != oldThread.getUsersAmount()) {
                 return true;
             }
 
-            if (StringUtils.isEmpty(newThread.imageUrl) && StringUtils.isEmpty(oldThread.imageUrl))
-            {
+            if (StringUtils.isEmpty(newThread.imageUrl) && StringUtils.isEmpty(oldThread.imageUrl)) {
                 return false;
             }
 
             return !newThread.imageUrl.equals(oldThread.imageUrl);
         }
 
-        public static String[] getLastMessageTextAndDate(BThread thread, String[] data){
+        public static String[] getLastMessageTextAndDate(BThread thread, String[] data) {
             List<BMessage> messages = thread.getMessagesWithOrder(DaoCore.ORDER_DESC);
 
             // If no message create dummy message.
-            if ( messages.size() == 0)
-            {
+            if (messages.size() == 0) {
 //                if (DEBUG) Log.d(TAG, "No messages");
 //            message = new BMessage();
 //            message.setText("No Messages...");
@@ -512,8 +501,7 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
             if (messages.get(0).getType() == null)
                 data[0] = "Bad Data";
             else
-                switch (messages.get(0).getType())
-                {
+                switch (messages.get(0).getType()) {
                     case TEXT:
                         // TODO cut string if needed.
                         //http://stackoverflow.com/questions/3630086/how-to-get-string-width-on-android
@@ -542,7 +530,9 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
             return lastMessageDate;
         }
 
-        public Date getLastMessageDate() { return date;}
+        public Date getLastMessageDate() {
+            return date;
+        }
 
         public String getImageUrl() {
             return imageUrl;
@@ -568,15 +558,15 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
             return unreadMessagesAmount;
         }
 
-        public boolean isImageChached(){
+        public boolean isImageChached() {
             return VolleyUtils.getBitmapCache().contains(getEntityId());
         }
 
-        public Bitmap getCachedImage(){
+        public Bitmap getCachedImage() {
             return VolleyUtils.getBitmapCache().get(getEntityId());
         }
 
-        public void cacheImage(Bitmap bitmap){
+        public void cacheImage(Bitmap bitmap) {
             VolleyUtils.getBitmapCache().put(getEntityId(), bitmap);
         }
     }
@@ -592,7 +582,7 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
     /*############################################*/
     public abstract void initMaker();
 
-    protected ThreadListItemMaker<ThreadListItem> getDefaultMaker(){
+    protected ThreadListItemMaker<ThreadListItem> getDefaultMaker() {
         return new ThreadListItemMaker<ThreadListItem>() {
             @Override
             public ThreadListItem fromBThread(BThread thread) {
@@ -601,7 +591,7 @@ public abstract class ChatSDKAbstractThreadsListAdapter<E extends ChatSDKAbstrac
                 ThreadListItem.getLastMessageTextAndDate(thread, data);
 
                 List<BUser> users = thread.getUsers();
-                String url  = thread.threadImageUrl();
+                String url = thread.threadImageUrl();
 
                 String displayName = thread.displayName(users);
 

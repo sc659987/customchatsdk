@@ -158,9 +158,6 @@ public class NotificationUtils {
         wakeScreen(context);
     }
 
-
-
-
     /** Create and alert notification that the connection has lost.*/
     public static void createAlertNotification(Context context, int id, Intent resultIntent, Bundle data){
         createAlertNotification(context, id, resultIntent, data, R.drawable.ic_launcher, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), -1);
