@@ -26,12 +26,11 @@ public class PagerAdapterTabs extends AbstractChatSDKTabsAdapter implements Page
     public PagerAdapterTabs(FragmentManager fm) {
         super(fm);
 
-        fragments = new ChatSDKBaseFragment[] {ChatSDKConversationsFragment.newInstance(),
-                ChatSDKThreadsFragment.newInstance(),
+        fragments = new ChatSDKBaseFragment[]{ChatSDKConversationsFragment.newInstance(),
                 ChatSDKContactsFragment.newInstance("ConvFragmentPage"),
                 ChatSDKProfileFragment.newInstance()};
 
-        icnns = new int[] {R.drawable.ic_action_private, R.drawable.ic_action_public, R.drawable.ic_action_contacts, R.drawable.ic_action_user };
+        icnns = new int[]{R.drawable.ic_action_private, R.drawable.ic_action_contacts, R.drawable.ic_action_user};
     }
 
 }

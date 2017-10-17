@@ -7,6 +7,7 @@
 
 package com.braunster.chatsdk.fragments.abstracted;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.TimingLogger;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.braunster.chatsdk.R;
@@ -51,7 +54,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -72,12 +78,45 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
     public static final String APP_EVENT_TAG = "ConverstaionFragment";
 
     protected RecyclerView recyclerView;
+
+    private LinearLayoutManager mLayoutManager;
+
     protected ConversionAdapter conversionAdapter;
 
-    protected ProgressBar progressBar;
+    //protected ProgressBar progressBar;
+
+    protected ProgressDialog progressDialog;
 
     protected TimingLogger timings;
-    protected UIUpdater uiUpdater;
+
+
+    protected UIUpdater uiUpdater = new UIUpdater() {
+        @Override
+        public void run() {
+
+            if (!isNewPage && System.currentTimeMillis() - lastUpdated < 10000) {
+                return;
+            }
+
+            List list = BNetworkManager.sharedManager()
+                    .getNetworkAdapter().getPrivateThreadWithLimit(form, limit);
+            if (DEBUG)
+                timings.addSplit("Loading threads");
+            //uiUpdater = null;
+            Message message = new Message();
+            message.obj = list;
+            message.what = 1;
+            try {
+                Thread.sleep(1000L);
+            } catch (Exception e) {
+            }
+            isNewPage = false;
+            handler.sendMessageAtFrontOfQueue(message);
+            lastUpdated = System.currentTimeMillis();
+
+            if (DEBUG) timings.addSplit("Sending message to handler.");
+        }
+    };
 
     protected boolean inflateMenuItems = true;
 
@@ -92,39 +131,64 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActivity().registerReceiver(receiver, new IntentFilter(ChatSDKAbstractChatActivity.ACTION_CHAT_CLOSED));
+        this.progressDialog = new ProgressDialog(getActivity());
     }
+
+    private volatile boolean isNewPage = false;
 
     @Override
     public void initViews() {
         //listThreads = (ListView) mainView.findViewById(R.id.list_threads);
-        recyclerView = (RecyclerView) mainView.findViewById(R.id.chat_conversion_recycler_view);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(mLayoutManager);
+        this.recyclerView = (RecyclerView) mainView.findViewById(R.id.chat_conversion_recycler_view);
+        this.mLayoutManager = new LinearLayoutManager(getActivity());
+        this.recyclerView.setLayoutManager(mLayoutManager);
 
         this.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+
+                int totalItemCount = mLayoutManager.getItemCount();
+                int firstVisibleItemPosition = mLayoutManager.findFirstCompletelyVisibleItemPosition();
+                int lastVisibleItemPosition = mLayoutManager.findLastCompletelyVisibleItemPosition();
+
+                if (firstVisibleItemPosition == 0 && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    if (form > 0) {
+                        form -= limit - 1;
+                        progressDialog.setMessage("previous 20 items being loaded...");
+                        progressDialog.show();
+                        isNewPage = true;
+                        loadDataOnBackground(0);
+                    }
+                }
+                if (lastVisibleItemPosition == totalItemCount - 1 && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    if (totalItemCount == limit) {
+                        form += limit - 1;
+                        progressDialog.setMessage("next 20 items being loaded...");
+                        progressDialog.show();
+                        isNewPage = true;
+                        loadDataOnBackground(0);
+                    }
+                }
             }
         });
         this.conversionAdapter = new ConversionAdapter();
 
-        progressBar = (ProgressBar) mainView.findViewById(R.id.chat_sdk_progress_bar);
+        //progressBar = (ProgressBar) mainView.findViewById(R.id.chat_sdk_progress_bar);
         initList();
     }
 
     private void initList() {
         this.recyclerView.setAdapter(conversionAdapter);
-        //  if (onItemClickListener == null) {
+//        if (onItemClickListener == null) {
 //            onItemClickListener = new AdapterView.OnItemClickListener() {
 //                @Override
 //                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                    startChatActivityForID(adapter.getItem(position).getId());
+//startChatActivityForID(adapter.getItem(position).getId());
 //                }
 //            };
 //        }
-//
-//        //listThreads.setOnItemClickListener(onItemClickListener);
+//        recyclerView.setOnItemClickListener(onItemClickListener);
 //
 //        if (onItemLongClickListener == null) {
 //            onItemLongClickListener = new AdapterView.OnItemLongClickListener() {
@@ -154,27 +218,13 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
         recyclerView.invalidate();
     }
 
-    @Override
-    public void loadDataOnBackground() {
-        uiUpdater = new UIUpdater() {
-            @Override
-            public void run() {
-                List list = BNetworkManager.sharedManager()
-                        .getNetworkAdapter().getPrivateThreadWithLimit(form, limit);
-                if (DEBUG)
-                    timings.addSplit("Loading threads");
-                uiUpdater = null;
-                Message message = new Message();
-                message.obj = list;
-                message.what = 1;
-                handler.sendMessageAtFrontOfQueue(message);
 
-                if (DEBUG) timings.addSplit("Sending message to handler.");
-            }
-        };
-
-        ChatSDKAbstractConversationsFragmentChatSDKThreadPool.getInstance().scheduleExecute(uiUpdater, 10);
+    public void loadDataOnBackground(final long delayInSec) {
+        ChatSDKAbstractConversationsFragmentChatSDKThreadPool.getInstance().scheduleExecute(uiUpdater, delayInSec);
     }
+
+
+    private long lastUpdated = System.currentTimeMillis();
 
     @Override
     public void refreshForEntity(Entity entity) {
@@ -184,10 +234,10 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
 //
 //
 //        adapter.replaceOrAddItem((BThread) entity);
-        if (progressBar.getVisibility() == View.VISIBLE) {
-            progressBar.setVisibility(View.GONE);
-            //listThreads.setVisibility(View.VISIBLE);
-        }
+//        if (progressBar.getVisibility() == View.VISIBLE) {
+//            progressBar.setVisibility(View.GONE);
+//            //listThreads.setVisibility(View.VISIBLE);
+//        }
     }
 
     @Override
@@ -217,7 +267,8 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
                     conversionAdapter.clearData();
                     conversionAdapter.setData((List<BThread>) msg.obj);
                     conversionAdapter.notifyDataSetChanged();
-                    loadDataOnBackground();
+                    loadDataOnBackground(10);
+                    recyclerView.scrollToPosition(0);
 //                    //adapter.setThreadItems((List<ChatSDKThreadsListAdapter.ThreadListItem>) msg.obj);
 //                    if (progressBar.getVisibility() == View.VISIBLE) {
 //                        progressBar.setVisibility(View.INVISIBLE);
@@ -229,6 +280,10 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
 //                        timings.reset(TAG.substring(0, 21), "loadDataOnBackground");
 //                    }loadDataOnBackground()
                     break;
+            }
+
+            if (progressDialog != null && progressDialog.isIndeterminate()) {
+                progressDialog.cancel();
             }
         }
     }
@@ -264,18 +319,35 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
         return super.onOptionsItemSelected(item);
     }
 
+    private ScheduledExecutorService scheduler;
+
+
     @Override
     public void onResume() {
         super.onResume();
+//        loadDataOnBackground();
+        if (scheduler == null) {
+            scheduler = Executors.newScheduledThreadPool(1);
+        }
+        if (scheduler.isTerminated()) {
+            scheduler = Executors.newScheduledThreadPool(1);
+        }
+
+        scheduler.scheduleAtFixedRate(uiUpdater, 0, 10, TimeUnit.SECONDS);
+
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
         loadDataOnBackground();
-
-
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        ChatSDKAbstractConversationsFragmentChatSDKThreadPool.getInstance().removeSchedule(uiUpdater);
+        scheduler.shutdown();
     }
 
     @Override
@@ -287,7 +359,7 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(ChatSDKAbstractChatActivity.ACTION_CHAT_CLOSED)) {
-                loadDataOnBackground();
+                loadDataOnBackground(10);
             }
         }
     };
@@ -307,15 +379,14 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
          * Gets the number of available cores
          * (not always the same as the maximum number of cores)
          */
-        private static int NUMBER_OF_CORES =
-                Runtime.getRuntime().availableProcessors();
+        private static int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
 
         private ThreadPoolExecutor threadPool;
         private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
         private static ChatSDKAbstractConversationsFragmentChatSDKThreadPool instance;
 
-        public static ChatSDKAbstractConversationsFragmentChatSDKThreadPool getInstance() {
+        public synchronized static ChatSDKAbstractConversationsFragmentChatSDKThreadPool getInstance() {
             if (instance == null)
                 instance = new ChatSDKAbstractConversationsFragmentChatSDKThreadPool();
             return instance;
@@ -343,6 +414,8 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
         }
 
         public void scheduleExecute(Runnable runnable, long delay) {
+            if (scheduledThreadPoolExecutor == null)
+                return;
             scheduledThreadPoolExecutor.schedule(runnable, delay, TimeUnit.SECONDS);
         }
 
@@ -361,10 +434,12 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
             private TextView lastMessageText;
             private TextView lastMessageDate;
             private TextView noUnreadMessage;
+            private View backgroundView;
 
 
             public ViewHolder(View view) {
                 super(view);
+                this.backgroundView = view.findViewById(R.id.id_chat_conversion_row);
                 this.image = (CircleImageView) view.findViewById(R.id.img_thread_image);
                 this.name = (TextView) view.findViewById(R.id.chat_sdk_txt);
                 this.lastMessageText = (TextView) view.findViewById(R.id.txt_last_message);
@@ -382,12 +457,18 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            ConversionListItem conversionListItem = this.conversionListItems.get(position);
+            final ConversionListItem conversionListItem = this.conversionListItems.get(position);
             holder.image.setImageResource(R.drawable.ic_profile);
             holder.name.setText(conversionListItem.name);
             holder.lastMessageText.setText(conversionListItem.lastMessageText);
             holder.lastMessageDate.setText(conversionListItem.lastMessageDate);
             holder.noUnreadMessage.setText(conversionListItem.noUnreadMessage);
+            holder.backgroundView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    startChatActivityForID(conversionListItem.id);
+                }
+            });
         }
 
         @Override
@@ -399,7 +480,7 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
             for (BThread thread : bThreads) {
                 String[] data = new String[2];
                 getLastMessageTextAndDate(thread, data);
-                conversionListItems.add(new ConversionListItem(thread.getEntityID(),
+                conversionListItems.add(new ConversionListItem(thread.getId(), thread.getEntityID(),
                         thread.displayName(),
                         thread.threadImageUrl(),
                         data[1], data[0],
@@ -414,6 +495,7 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
 
     public class ConversionListItem {
 
+        public Long id;
         public String entityId;
         public String url;
         public String name;
@@ -421,12 +503,13 @@ public class ChatSDKAbstractConversationsFragment extends ChatSDKBaseFragment {
         public String lastMessageDate;
         public String noUnreadMessage;
 
-        public ConversionListItem(String entityId,
+        public ConversionListItem(Long id, String entityId,
                                   String name,
                                   String imageUrl,
                                   String lastMessageDate,
                                   String lastMessageText,
                                   int unreadMessagesAmount) {
+            this.id = id;
             this.entityId = entityId;
             this.url = imageUrl;
             this.name = name;
