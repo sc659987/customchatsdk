@@ -83,5 +83,3 @@ repositories {
         dirs "../sdk/libs"
     }
 }
-
-

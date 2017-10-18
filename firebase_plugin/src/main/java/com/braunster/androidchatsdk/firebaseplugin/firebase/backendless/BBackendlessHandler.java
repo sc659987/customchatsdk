@@ -96,41 +96,41 @@ public class BBackendlessHandler implements BPushHandler, BUploadHandler {
     @Override
     public void pushToChannels(Collection<String> channels, JSONObject data) {
         // Configure the header
-        PublishOptions publishOptions = new PublishOptions();
-        try {
-        publishOptions.putHeader("android-ticker-text", data.getString(BDefines.Keys.CONTENT));
-        publishOptions.putHeader("android-content-title", "Message from " + data.getString(BDefines.Keys.MESSAGE_SENDER_NAME));
-        publishOptions.putHeader("android-content-text", data.getString(BDefines.Keys.MESSAGE_PAYLOAD));
-        publishOptions.setPublisherId(data.getString(BDefines.Keys.MESSAGE_SENDER_ENTITY_ID));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        // Only push to android devices
-        DeliveryOptions deliveryOptions = new DeliveryOptions();
-        deliveryOptions.setPushPolicy(PushPolicyEnum.ONLY);
-        deliveryOptions.setPushBroadcast(PushBroadcastMask.ALL);
-
-        // Publish a push notification to each channel
-        for(final String channel : channels) {
-            try {
-                data.put(BDefines.Keys.Channel, channel);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            Backendless.Messaging.publish(channel, data.toString(), publishOptions, deliveryOptions, new AsyncCallback<MessageStatus>() {
-                @Override
-                public void handleResponse(MessageStatus response) {
-                    if (DEBUG) Timber.v("Message published to channel: " + channel);
-                }
-
-                @Override
-                public void handleFault(BackendlessFault fault) {
-                    if (DEBUG) Timber.v("Publish failed, " + fault.getMessage());
-                }
-            });
-        }
+//        PublishOptions publishOptions = new PublishOptions();
+//        try {
+//        publishOptions.putHeader("android-ticker-text", data.getString(BDefines.Keys.CONTENT));
+//        publishOptions.putHeader("android-content-title", "Message from " + data.getString(BDefines.Keys.MESSAGE_SENDER_NAME));
+//        publishOptions.putHeader("android-content-text", data.getString(BDefines.Keys.MESSAGE_PAYLOAD));
+//        publishOptions.setPublisherId(data.getString(BDefines.Keys.MESSAGE_SENDER_ENTITY_ID));
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//
+//        // Only push to android devices
+//        DeliveryOptions deliveryOptions = new DeliveryOptions();
+//        deliveryOptions.setPushPolicy(PushPolicyEnum.ONLY);
+//        deliveryOptions.setPushBroadcast(PushBroadcastMask.ALL);
+//
+//        // Publish a push notification to each channel
+//        for(final String channel : channels) {
+//            try {
+//                data.put(BDefines.Keys.Channel, channel);
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//
+//            Backendless.Messaging.publish(channel, data.toString(), publishOptions, deliveryOptions, new AsyncCallback<MessageStatus>() {
+//                @Override
+//                public void handleResponse(MessageStatus response) {
+//                    if (DEBUG) Timber.v("Message published to channel: " + channel);
+//                }
+//
+//                @Override
+//                public void handleFault(BackendlessFault fault) {
+//                    if (DEBUG) Timber.v("Publish failed, " + fault.getMessage());
+//                }
+//            });
+//        }
     }
 
     @Override
